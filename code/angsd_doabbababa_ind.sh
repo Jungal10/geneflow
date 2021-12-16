@@ -1,35 +1,32 @@
 #!/bin/bash -l
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=smp-rh7 
-#SBATCH --mail-type=ALL
+#SBATCH --mem=252gb
 #SBATCH --time=96:00:00
-#SBATCH --mem=210gb
 #SBATCH --account=UniKoeln
-#SBATCH --mail-user=jgoncal1@uni-koeln.de
 #SBATCH --mail-type=ALL
-#SBATCH --error /scratch/jgoncal1/logs/errors/angsd_dovcf_geneflow_allchr_nodepth_filter_%j
-#SBATCH -o /scratch/jgoncal1/logs/angsd_dovcf_geneflow_allchr_nodepth_filter_%j
+#SBATCH --error /scratch/jgoncal1/logs/errors/ind_abbababa_geneflow_tuberculatus_%j.err 
+#SBATCH --output=/scratch/jgoncal1/logs/ind_abbababa_geneflow_tuberculatus_%J.out 
 #SBATCH -D /projects/ag-stetter/jdias/projects/geneflow/code/
-#SBATCH --job-name="angsd_dovcf_geneflow_allchr_nodepth_filter"
-
+#SBATCH --job-name="ind_abbababa_geneflow_tuberculatus" 
 
 source /home/jgoncal1/.bashrc
+module load gnu/7.4.0
 conda activate angsd_env
 
 INPUT_BAM='file_lists/list_bam_files_geneflow_tuberculatus.txt'
-OUTPUT_FILE='../data/processed/angsd_dovcf_108_samples_allchr_nodepth_filter'
+OUTPUT_FILE='../data/processed/abbababa_ind_geneflow_tuberculatus_nodepthfilter.Angsd'
 
 
-angsd -b $INPUT_BAM \
+angsd -doAbbababa 1 \
+-bam $INPUT_BAM \
 -out $OUTPUT_FILE \
 -ref ../data/raw/genomes/Ahypochondriacus_459_v2.0.fa \
 -doCounts 1 \
--doGeno 3 \
--dovcf 1 \
--gl 2 \
--dopost 2 \
--domajorminor 1 \
--domaf 1 \
+-doMaf 1 \
+-doMajorMinor 1 \
+-GL 2 \
+-useLast 1 \
 -checkBamHeaders 0 \
 -minInd 73 \
 -minQ 20 \
@@ -40,5 +37,5 @@ angsd -b $INPUT_BAM \
 -C 50
 
 
-#-setMinDepth 5 \
-#-setMaxDepth 150 \
+
+
