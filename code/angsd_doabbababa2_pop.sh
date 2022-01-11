@@ -33,7 +33,8 @@ angsd -doAbbababa2 1 \
 -only_proper_pairs 1 \
 -trim 0  \
 -C 50 \
--setMinDepth 5
+-setMinDepth 5 \
+-setMaxDepth 1500
 
 # -SNP_pval 1e-6 \
 # -doMaf 1 \

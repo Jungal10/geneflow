@@ -23,6 +23,9 @@ OUTPUT_FILE='../data/processed/angsd_dovcf_108_samples_allchr_depth1500_mindepth
 angsd -b $INPUT_BAM \
 -out $OUTPUT_FILE \
 -ref ../data/raw/genomes/Ahypochondriacus_459_v2.0.fa \
+-gl 2 \
+-doMajorMinor 1 \
+-doMaf 1 \
 -doCounts 1 \
 -doGeno 3 \
 -dovcf 1 \
@@ -34,5 +37,5 @@ angsd -b $INPUT_BAM \
 -only_proper_pairs 1 \
 -trim 0  \
 -C 50 \
--setMaxDepth 150 \
+-setMaxDepth 1500 \
 -setMinDepth 5 
