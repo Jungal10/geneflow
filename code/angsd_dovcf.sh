@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=5
 #SBATCH --partition=smp-rh7 
 #SBATCH --mail-type=ALL
 #SBATCH --time=720:00:00
@@ -14,6 +14,7 @@
 
 
 source /home/jgoncal1/.bashrc
+module load miniconda/py38_4.9.2
 conda activate angsd_env
 
 INPUT_BAM='file_lists/list_bam_files_geneflow_tuberculatus.txt'
@@ -23,6 +24,7 @@ OUTPUT_FILE='../data/processed/angsd_dovcf_108_samples_allchr_depth1500_maxmem_t
 angsd -b $INPUT_BAM \
 -out $OUTPUT_FILE \
 -ref ../data/raw/genomes/Ahypochondriacus_459_v2.0.fa \
+-P 5 \
 -doCounts 1 \
 -doGeno 3 \
 -dovcf 1 \
