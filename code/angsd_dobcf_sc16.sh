@@ -14,7 +14,8 @@
 
 
 source /home/jgoncal1/.bashrc
-conda activate angsd_env
+module load miniconda/py38_4.9.2
+conda activate angsd_new
 
 INPUT_BAM='file_lists/list_bam_files_geneflow_tuberculatus.txt'
 OUTPUT_FILE='../data/processed/angsd_dobcf_sc16_indp150_mindepth73'
