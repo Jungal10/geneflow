@@ -40,6 +40,6 @@ angsd -b $INPUT_BAM \
 -trim 0  \
 -SNP_pval 1e-6 \
 -C 50 \
--setMaxDepth 1500 \
- -SNP_pval 1e-6 
-#-setMinDepth 5 \
+-setMaxDepthInd 1500 \
+-setMinDepth 73 \
+-SNP_pval 1e-6 

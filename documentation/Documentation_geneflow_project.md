@@ -8,7 +8,14 @@
   - [Variant Calling](#variant-calling)
     - [Create VCF file](#create-vcf-file)
     - [Data phasing](#data-phasing)
-
+  - [Global gene flow](#global-gene-flow)
+    - [ABBA BABA](#abba-baba)
+      - [per individual ABBA BABA](#per-individual-abba-baba)
+      - [per popualtion ABBA BABA](#per-popualtion-abba-baba)
+  - [Local Gene Flow](#local-gene-flow)
+    - [D-suite](#d-suite)
+      - [Dtrios: D and f4-ratio](#dtrios-d-and-f4-ratio)
+      - [Dinvestigate: fd, fdM and f-branch statistics](#dinvestigate-fd-fdm-and-f-branch-statistics)
 
 
 
@@ -48,7 +55,7 @@ Current parameters (still running out of memory)
 - **setMaxDepthInd 150** -> Discard site if individual depth is above 150.
 - **setminDepth 73** -> Discard individual if sequencing depth for an individual is below 73 (combined with minIND 73, means that at least a minimum 73 individuals with a indDepth of 1 would be consdered)
 
-The output was indexed using tabix
+The output was indexed using ```tabix -p vcf $VCF_FILE```
 
 
 *Previously used parameters (including all WGS samples and multiple outgroups on the vcf file)*
@@ -103,6 +110,127 @@ For dataphasing, Beagle(v5.2) was used using the following command:
 
 ```bash
 java -Xmx60000m -jar ../../../tools/beagle.29May21.d6d.jar \
-gt=prepared_vcf_file \
-out=phasedVCF  
+gt=$prepared_vcf_file \
+out=$phasedVCF  
+```
+
+
+## Global gene flow
+
+### ABBA BABA
+
+#### per individual ABBA BABA
+
+- run individual abba-baba
+
+
+```bash
+#!/bin/bash -l
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=42gb
+#SBATCH --time=96:00:00
+#SBATCH --account=UniKoeln
+#SBATCH --mail-user=jgoncal1@uni-koeln.de
+#SBATCH --error /scratch/jgoncal1/logs/errors/ind_abba_sc9_500kb_%j
+#SBATCH -D /projects/ag-stetter/jdias/projects/geneflow/sandbox/
+#SBATCH -o /scratch/jgoncal1/logs/ind_abba_sc9_500kb_%j
+
+source /home/jgoncal1/.bashrc
+module load gnu/4.8.2
+INPUT_BAM='../data/raw/list_109int_tubercualtus_ERR3220318.file.list'
+OUTPUT_FILE='../data/processed/ind_abba_110_ERR3220318.file.list.Angsd'
+
+
+~/angsd/angsd -doAbbababa 1 \
+-bam $INPUT_BAM \
+-doCounts 1 \
+-out $OUTPUT_FILE \
+-blockSize 500000 \
+-useLast 1 \
+-rf ../data/raw/ch9 \
+-checkBamHeaders 0 \
+-nInd 110 \
+-minQ 20 \
+-remove_bads 1 \
+-minMapQ 30 \
+-minInd 76 
+```
+
+
+- Run Rscript to convert results  into understandable output
+
+``` bash
+#!/bin/bash -l
+#SBATCH --time=72:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=24gb#SBATCH --account=UniKoeln
+#SBATCH --mail-user=jgoncal1@uni-koeln.de
+#SBATCH --error /scratch/jgoncal1/logs/errors/ind_R_abba_sc9_%j
+#SBATCH -o /scratch/jgoncal1/logs/ind_R_abba_sc9_%j
+#SBATCH -D /projects/ag-stetter/jdias/projects/geneflow/sandbox/
+source /home/jgoncal1/.bashrc
+
+# module load gnu/7.4.0
+module load R
+
+
+Rscript ~/angsd/R/jackKnife.R file=../data/processed/ind_abba_region_smalllist_ERR3220318_1M.file.list.Angsd.abbababa \
+indNames=../data/raw/list_small_for_tests_R.file.list \
+outfile=../data/processed/ind_abba_region_smalllist_ERR3220318_1M_R
+```
+
+
+
+
+
+#### per popualtion ABBA BABA
+
+```bash
+#!/bin/bash -l
+#SBATCH --cpus-per-task=6
+#SBATCH --mem=21gb
+#SBATCH --time=4:00:00
+#SBATCH --account=UniKoeln
+#SBATCH --error /scratch/jgoncal1/logs/errors/%j
+#SBATCH -D /projects/ag-stetter/jdias/projects/geneflow/data/processed/
+#SBATCH -o /scratch/jgoncal1/logs/%j
+
+source /home/jgoncal1/.bashrc
+module load gnu/4.8.2
+INPUT_BAM='/projects/ag-stetter/jdias/projects/geneflow/data/raw/109int_tubercualtus_ERR3220406.file.list'
+SIZE_FILE='/projects/ag-stetter/jdias/projects/geneflow/data/processed/size_cau_cru_hybCA_hybSA_hyp_qui.size'
+OUTPUT_FILE='/projects/ag-stetter/jdias/projects/geneflow/data/processed/109int_tubercualtus_ERR3220406'
+ANCESTRAL=''```
+~/angsd/angsd -doAbbababa2 1 \
+-bam $INPUT_BAM \
+-sizeFile $SIZE_FILE \
+-doCounts 1 \
+-out $OUTPUT_FILE \
+-useLast 1 \
+-rf /projects/ag-stetter/jdias/projects/geneflow/sandbox/ch1.txt \
+-checkBamHeaders 0 \
+-minQ 20 \
+-minMapQ 30
+```
+
+## Local Gene Flow
+
+### D-suite
+
+#### Dtrios: D and f4-ratio
+
+Requirments:
+
+- text file (sets.txt) with sample-name\tpopulation
+Should have the outgroup population written as "Outgroup".
+- windows size (e.g 10000, 100) Windows of 10kb with a 100bp sliding window)
+
+#### Dinvestigate: fd, fdM and f-branch statistics
+
+Requires aditionally:
+- test_trios.txt file for Dinvestigate. One trio of populations/species per line, separated by a tab in the order P1 P2 P3.
+
+
+```bash
+Dsuite Dinvestigate $VCF_FILE  sets.txt  test_trios.txt -w 10000,1
 ```
