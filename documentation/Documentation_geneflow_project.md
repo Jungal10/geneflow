@@ -7,7 +7,9 @@
   - [Data sampling](#data-sampling)
   - [Variant Calling](#variant-calling)
     - [Create VCF file](#create-vcf-file)
+    - [VCF file created by angsd assigns wrongly the individuals names.](#vcf-file-created-by-angsd-assigns-wrongly-the-individuals-names)
     - [Data phasing](#data-phasing)
+    - [Subsample and filtering](#subsample-and-filtering)
   - [Global gene flow](#global-gene-flow)
     - [ABBA BABA](#abba-baba)
       - [per individual ABBA BABA](#per-individual-abba-baba)
@@ -32,9 +34,7 @@ Full list of samples available [here](https://docs.google.com/spreadsheets/d/1c-
 
 For calling variants, ANGSD v.0921 (Korilussen et. al 2014) was used.
 
-Current parameters (still running out of memory)
-
-- **b** -> file with the paths for the bam files in use (preferentialy use the outgroup as last)
+- **b** -> file with the paths for the bam files in use (preferentialy use the outgroup as last) ```list_bam_files_geneflow_tuberculatus.txt```
 - **out** -> output file prefix name
 - **ref** -> file with the fast file for the reference  genome (used A. hypochondriacus from Lightfoot et. al 2017)
 - **doCounts 1** -> count the number of A,C,G,T. All sites, All samples — necessary for filtering 
@@ -51,38 +51,12 @@ Current parameters (still running out of memory)
 - **only_proper_pairs 1** Include only proper pairs (pairs of read with both mates mapped correctly
 - **trim 0**  -> Number of based to discard at both ends of the reads ;
 - **SNP_pval 1e-6** 
-- **C 50** -> Adjust mapQ for excessive mismatches \
 - **setMaxDepthInd 150** -> Discard site if individual depth is above 150.
 - **setminDepth 73** -> Discard individual if sequencing depth for an individual is below 73 (combined with minIND 73, means that at least a minimum 73 individuals with a indDepth of 1 would be consdered)
 
 The output was indexed using ```tabix -p vcf $VCF_FILE```
 
-
-*Previously used parameters (including all WGS samples and multiple outgroups on the vcf file)*
-
-```bash
-angsd -b $INPUT_BAM \
--P 5 \
--ref ../data/raw/genomes/Ahypochondriacus_459_v2.0.fa \
--remove_bads 1 \
--only_proper_pairs 1 \
--trim 0  \
--C 50  \
--minMapQ 30 \
--minQ 30 \
--doCounts 1 \
--setMinDepth 5 \
--setMaxDepth 150 \
--doGeno 3 \
--dovcf 1 \
--gl 2 \
--dopost 2 \
--domajorminor 1 \
--domaf 1 \
--snp_pval 1e-6 \
--checkBamHeaders 0 \
--out $OUTPUT_FILE
-```
+Previous results:
 
 It output 1,776,146 sites, distributed this way per chromossome:
 
@@ -103,6 +77,18 @@ It output 1,776,146 sites, distributed this way per chromossome:
  101,294 Scaffold_8
  104,457 Scaffold_9
 
+### VCF file created by angsd assigns wrongly the individuals names.
+To fix this:
+
+- run bcftools reheader (It will output a BCF file)
+```bash
+ bcftools reheader -s $SAMPLES_LIST $VCF_FILE > $FIXED_BCF_FILE
+``` 
+tabix the file:
+
+```bash
+tabix -p bcf $BCF_FILE
+```
 
 ### Data phasing
 
@@ -114,10 +100,15 @@ gt=$prepared_vcf_file \
 out=$phasedVCF  
 ```
 
+### Subsample and filtering
+
+If a subsampling of the VCF is necessary, it can
+
 
 ## Global gene flow
 
 ### ABBA BABA
+Calcualtes D-statistic as an estimation of correctness of a 4-branched tree. H1 and H2 are inner nodes, H3 the potential "donor\recipient" of gene flow and H4 as an outgroup. 
 
 #### per individual ABBA BABA
 
@@ -147,13 +138,15 @@ OUTPUT_FILE='../data/processed/ind_abba_110_ERR3220318.file.list.Angsd'
 -out $OUTPUT_FILE \
 -blockSize 500000 \
 -useLast 1 \
--rf ../data/raw/ch9 \
 -checkBamHeaders 0 \
--nInd 110 \
--minQ 20 \
+-minQ 30 \
 -remove_bads 1 \
 -minMapQ 30 \
 -minInd 76 
+-only_proper_pairs 1 \
+-trim 0 \
+-setMinDepth 73 \
+-setMaxDepthInd 150 
 ```
 
 
@@ -206,11 +199,17 @@ ANCESTRAL=''```
 -sizeFile $SIZE_FILE \
 -doCounts 1 \
 -out $OUTPUT_FILE \
+-blockSize 500000 \
 -useLast 1 \
--rf /projects/ag-stetter/jdias/projects/geneflow/sandbox/ch1.txt \
 -checkBamHeaders 0 \
--minQ 20 \
--minMapQ 30
+-minQ 30 \
+-remove_bads 1 \
+-minMapQ 30 \
+-minInd 76 
+-only_proper_pairs 1 \
+-trim 0 \
+-setMinDepth 73 \
+-setMaxDepthInd 150 
 ```
 
 ## Local Gene Flow
@@ -221,16 +220,17 @@ ANCESTRAL=''```
 
 Requirments:
 
-- text file (sets.txt) with sample-name\tpopulation
+- text file (*sets.txt*) with sample-name\tpopulation
 Should have the outgroup population written as "Outgroup".
 - windows size (e.g 10000, 100) Windows of 10kb with a 100bp sliding window)
 
 #### Dinvestigate: fd, fdM and f-branch statistics
 
 Requires aditionally:
-- test_trios.txt file for Dinvestigate. One trio of populations/species per line, separated by a tab in the order P1 P2 P3.
+- file *test_trios.txt* for Dinvestigate. One trio of populations/species per line, separated by a tab in the order P1 P2 P3.
 
 
 ```bash
 Dsuite Dinvestigate $VCF_FILE  sets.txt  test_trios.txt -w 10000,1
 ```
+

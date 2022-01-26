@@ -106,4 +106,4 @@ Ames5342	quitensis	/projects/ag-stetter/wgrs_amaranth/bams_withRG_ahyp_v2/Ames53
 PI511749	quitensis	/projects/ag-stetter/wgrs_amaranth/bams_withRG_ahyp_v2/PI511749.bam
 PI652426	quitensis	/projects/ag-stetter/wgrs_amaranth/bams_withRG_ahyp_v2/PI652426.bam
 PI511736	quitensis	/projects/ag-stetter/wgrs_amaranth/bams_withRG_ahyp_v2/PI511736.bam
-ERR3220318      Outgroup_tuberculatus   /projects/ag-stetter/jdias/projects/geneflow/data/raw/bam_files/ERR3220318.sorted.bam
+ERR3220318			Outgroup		/projects/ag-stetter/jdias/projects/geneflow/data/raw/bam_files/ERR3220318.sorted.bam

@@ -5,17 +5,17 @@
 #SBATCH --time=120:00:00
 #SBATCH --account=UniKoeln
 #SBATCH --mail-type=ALL
-#SBATCH --error /scratch/jgoncal1/logs/errors/abbababa_ind_geneflow_tuberculatus_nosnppvalue_depth1500_mindepth5_%j.err 
-#SBATCH --output=/scratch/jgoncal1/logs/abbababa_ind_geneflow_tuberculatus_nosnppvalue_depth1500_mindepth5_%J.out 
+#SBATCH --error /scratch/jgoncal1/logs/errors/abbababa_ind_sc16_%j.err 
+#SBATCH --output=/scratch/jgoncal1/logs/abbababa_ind_sc16_%j.out 
 #SBATCH -D /projects/ag-stetter/jdias/projects/geneflow/code/
-#SBATCH --job-name="abbababa_ind_geneflow_tuberculatus_nosnppvalue_depth1500_max_mem_time_mindepth5" 
+#SBATCH --job-name="abbababa_ind_sc16" 
 
 source /home/jgoncal1/.bashrc
-module load gnu/7.4.0
+module load miniconda/py38_4.9.2
 conda activate angsd_env
-
+ 
 INPUT_BAM='file_lists/list_bam_files_geneflow_tuberculatus.txt'
-OUTPUT_FILE='../data/processed/abbababa_ind_geneflow_tuberculatus_nosnppvalue_depth1500_mindepth_5.Angsd'
+OUTPUT_FILE='../data/processed/abbababa_ind_sc16.Angsd'
 
 
 angsd -doAbbababa 1 \
@@ -24,17 +24,14 @@ angsd -doAbbababa 1 \
 -ref ../data/raw/genomes/Ahypochondriacus_459_v2.0.fa \
 -doCounts 1 \
 -useLast 1 \
+-remove_bads 1 \
+-minMapQ 30 \
+-minQ 30 \
+-gl 2 \
 -checkBamHeaders 0 \
 -minInd 73 \
--minQ 20 \
--minMapQ 30 \
 -only_proper_pairs 1 \
--trim 0  \
--setMaxDepth 1500 \
--C 50 \
--setMinDepth 5
-
-# -GL 2 \
-# -doMaf 1 \
-# -doMajorMinor 1 \
-# -SNP_pval 1e-6 \
+-trim 0 \
+-setMinDepth 73 \
+-setMaxDepthInd 150 \
+-r Scaffold_16: 
