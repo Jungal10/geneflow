@@ -10,7 +10,7 @@
 #SBATCH --error /scratch/jgoncal1/logs/errors/angsd_dobcf_sc16_dp150_%j
 #SBATCH -o /scratch/jgoncal1/logs/angsd_dobcf_sc16_dp150_%j
 #SBATCH -D /projects/ag-stetter/jdias/projects/geneflow/code/
-#SBATCH --job-name="angsd_dovcf_sc16"
+#SBATCH --job-name="angsd_dobcf_sc16"
 
 
 source /home/jgoncal1/.bashrc
@@ -28,7 +28,7 @@ angsd -b $INPUT_BAM \
 -r Scaffold_16: \
 -doCounts 1 \
 -doGeno 3 \
--dovcf 1 \
+-dobcf 1 \
 -gl 2 \
 -dopost 2 \
 -domajorminor 1 \

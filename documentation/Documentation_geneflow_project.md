@@ -90,7 +90,17 @@ tabix the file:
 tabix -p bcf $BCF_FILE
 ```
 
+
 ### Data phasing
+
+convert bcf to vcf.gz and tabix for phasing
+```bash
+bcftools view reheader_dovcf_geneflowsamples_sc16.bcf -O z -o reheader_dovcf_geneflowsamples_sc16.vcf.gz
+
+tabix -p vcf $VCFgzFILE
+```
+
+
 
 For dataphasing, Beagle(v5.2) was used using the following command:
 

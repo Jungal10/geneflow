@@ -15,5 +15,5 @@ module load openjdk/1.8.0_60
 
 
 java -Xmx60000m -jar /projects/jgoncal1/tools/bin/beagle.28Jun21.220.jar \
-gt=../data/processed/subsampled_minmaf0005.vcf.gz \
-out=../data/processed/phased_subsampled_minmaf0005 
+gt=../data/processed/reheader_dovcf_geneflowsamples_sc16.vcf.gz  \
+out=../data/processed/phased_reheader_dovcf_geneflowsamples_sc16
