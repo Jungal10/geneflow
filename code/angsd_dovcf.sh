@@ -6,10 +6,10 @@
 #SBATCH --mem=42gb
 #SBATCH --account=UniKoeln
 #SBATCH --mail-user=jgoncal1@uni-koeln.de
-#SBATCH --error /scratch/jgoncal1/logs/errors/dovcf_geneflowsamples_sc16_%j
-#SBATCH -o /scratch/jgoncal1/logs/dovcf_geneflowsamples_sc16_%j
+#SBATCH --error /scratch/jgoncal1/logs/errors/dovcf_geneflowsamples_contigs_%j
+#SBATCH -o /scratch/jgoncal1/logs/dovcf_geneflowsamples_contigs_%j
 #SBATCH -D /projects/ag-stetter/jdias/projects/geneflow/code/
-#SBATCH --job-name="angsd_dovcf_geneflowsamples_sc16"
+#SBATCH --job-name="angsd_dovcf_geneflowsamples_contigs"
 
 
 source /home/jgoncal1/.bashrc
@@ -17,7 +17,7 @@ module load miniconda/py38_4.9.2
 conda activate angsd_env
 
 INPUT_BAM='file_lists/list_bam_files_geneflow_tuberculatus.txt'
-OUTPUT_FILE='../data/processed/dovcf_geneflowsamples_sc16'
+OUTPUT_FILE='../data/processed/dovcf_geneflowsamples_contigs'
 
 
 angsd -b $INPUT_BAM \
@@ -40,5 +40,6 @@ angsd -b $INPUT_BAM \
 -trim 0 \
 -setMinDepth 73 \
 -setMaxDepthInd 150 \
--r Scaffold_16: \
+-rf file_lists/list_contigs \
+-minMaf 0.02 \
 -out $OUTPUT_FILE
