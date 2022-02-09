@@ -400,7 +400,7 @@ done
 
 ```plink2chromopainter_step2.sh```
 
-- Run chromopainter. Using a 
+- Run chromopainter. Using a $$
 
 ```cp2_with_f```
 

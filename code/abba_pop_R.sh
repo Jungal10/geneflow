@@ -21,7 +21,7 @@ conda activate angsd_env
 module load R
 
 
-ABABABABA_FILE="../data/processed/abbababa2_pop_sc16.Angsd"
+ABABABABA_FILE="../data/processed/abbababa2_pop_sc16_maf002.Angsd"
 OUTPUT_FILE="../data/processed/abba_pop_R_sc16"
 SIZEFILE="file_lists/gene_flow_tuberculatus.size"
 POPNAMES="file_lists/gene_flow_tuberculatus.name"

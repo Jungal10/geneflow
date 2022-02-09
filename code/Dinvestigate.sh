@@ -16,7 +16,7 @@ module load gnu/7.4.0
 
 Dsuite Dinvestigate \
 -w 50,1 \
--n Dsuite_Dinvestigate_w50 \
-../data/processed/phased_subsampled_minmaf0005.vcf.gz \
+-n Dsuite_Dinvestigate_w50_sc16_extended_trios \
+../data/processed/filtered_reheader_prunned_sc16.vcf.gz \
 file_lists/list_amaranth_geneflow_samples_populations.txt \
-file_lists/correct_trios.txt 
+file_lists/duplicated_correct_trios.txt 

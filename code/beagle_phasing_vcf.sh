@@ -1,5 +1,6 @@
 #!/bin/bash -l
 #SBATCH --time=24:00:00
+#SBATCH --partition=smp-rh7
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=84gb
 #SBATCH --account=UniKoeln
@@ -13,12 +14,12 @@ source /home/jgoncal1/.bashrc
 module load openjdk/1.8.0_60
 
 
-for scaffold in {1..15};do # loop per scaffold
+#for scaffold in {1..15};do # loop per scaffold
 
 
 java -Xmx60000m -jar /projects/jgoncal1/tools/bin/beagle.28Jun21.220.jar \
-gt=../data/processed/$scaffold.vcf.gz  \
-out=../data/processed/phased_$scaffold.vcf.gz
+gt=../data/processed/reheader_dovcf_geneflowsamples_all_chr.vcf.gz  \
+out=../data/processed/phased_reheader_dovcf_geneflowsamples_all_chr
 
 
-done
+#done

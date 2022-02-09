@@ -58,24 +58,9 @@ The output was indexed using ```tabix -p vcf $VCF_FILE```
 
 Previous results:
 
-It output 1,776,146 sites, distributed this way per chromossome:
+It output XXX sites, distributed this way per chromossome:
 
- 165,675 Scaffold_1
- 103,119 Scaffold_10
- 104,534 Scaffold_11
- 103,542 Scaffold_12
-  98,028 Scaffold_13
-  81,469 Scaffold_14
-  75,238 Scaffold_15
-  73,733 Scaffold_16
- 151,870 Scaffold_2
- 128,947 Scaffold_3
- 123,464 Scaffold_4
- 112,882 Scaffold_5
- 113,046 Scaffold_6
- 102,703 Scaffold_7
- 101,294 Scaffold_8
- 104,457 Scaffold_9
+
 
 ### VCF file created by angsd assigns wrongly the individuals names.
 To fix this:
@@ -243,4 +228,8 @@ Requires aditionally:
 ```bash
 Dsuite Dinvestigate $VCF_FILE  sets.txt  test_trios.txt -w 10000,1
 ```
+
+### Topology and twisst
+
+## Linkage Desiquilibrium
 

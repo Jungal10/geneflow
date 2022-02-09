@@ -5,10 +5,10 @@
 #SBATCH --time=48:00:00
 #SBATCH --account=UniKoeln
 #SBATCH --mail-type=ALL
-#SBATCH --error /scratch/jgoncal1/logs/errors/abbababa2_pop_sc16_%j.err 
-#SBATCH -o /scratch/jgoncal1/logs/abbababa2_pop_sc16_%j.out 
+#SBATCH --error /scratch/jgoncal1/logs/errors/abbababa2_pop_sc16_maf002_%j.err 
+#SBATCH -o /scratch/jgoncal1/logs/abbababa2_pop_sc16_maf002_%j.out 
 #SBATCH -D /projects/ag-stetter/jdias/projects/geneflow/code/
-#SBATCH --job-name='abbababa2_pop_sc16'
+#SBATCH --job-name='abbababa2_pop_sc16_maf002'
 
 
 source /home/jgoncal1/.bashrc
@@ -17,7 +17,7 @@ conda activate angsd_env
 
 INPUT_BAM='file_lists/list_bam_files_geneflow_tuberculatus.txt'
 SIZE_FILE='file_lists/gene_flow_tuberculatus.size'
-OUTPUT_FILE='../data/processed/abbababa2_pop_sc16.Angsd'
+OUTPUT_FILE='../data/processed/abbababa2_pop_sc16_maf002.Angsd'
 
 
 angsd -doAbbababa2 1 \
@@ -26,6 +26,8 @@ angsd -doAbbababa2 1 \
 -out $OUTPUT_FILE \
 -ref ../data/raw/genomes/Ahypochondriacus_459_v2.0.fa \
 -doCounts 1 \
+-doMaf 1 \
+-domajorminor 1 \
 -useLast 1 \
 -remove_bads 1 \
 -minMapQ 30 \
@@ -37,4 +39,5 @@ angsd -doAbbababa2 1 \
 -trim 0 \
 -setMinDepth 73 \
 -setMaxDepthInd 150 \
+-minMaf 0.02 \
 -r Scaffold_16: 

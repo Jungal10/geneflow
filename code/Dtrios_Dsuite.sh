@@ -15,4 +15,4 @@ conda activate base_jgd
 module load gnu/7.4.0
 
 
-Dsuite Dtrios ../data/processed/phased_subsampled_minmaf0005.vcf.gz file_lists/list_amaranth_geneflow_samples_populations.txt  -n  Dsuite_Dtrios_angsd_phased_vcf_all_chr  -o ../data/processed/Dtrios -c
+Dsuite Dtrios ../data/processed/reheader_prunned_sc16.vcf.gz file_lists/list_amaranth_geneflow_samples_populations.txt  -n  Dsuite_Dtrios_sc_16  -o ../data/processed/Dtrios -c
