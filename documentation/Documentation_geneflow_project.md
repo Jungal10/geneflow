@@ -18,6 +18,11 @@
     - [D-suite](#d-suite)
       - [Dtrios: D and f4-ratio](#dtrios-d-and-f4-ratio)
       - [Dinvestigate: fd, fdM and f-branch statistics](#dinvestigate-fd-fdm-and-f-branch-statistics)
+    - [Topology and twisst](#topology-and-twisst)
+  - [Linkage Desiquilibrium](#linkage-desiquilibrium)
+    - [popLDecay](#popldecay)
+  - [Treemix](#treemix)
+    - [File preparation](#file-preparation)
 
 
 
@@ -224,12 +229,104 @@ Should have the outgroup population written as "Outgroup".
 Requires aditionally:
 - file *test_trios.txt* for Dinvestigate. One trio of populations/species per line, separated by a tab in the order P1 P2 P3.
 
-
 ```bash
 Dsuite Dinvestigate $VCF_FILE  sets.txt  test_trios.txt -w 10000,1
 ```
 
 ### Topology and twisst
 
-## Linkage Desiquilibrium
+For topoly inference:
 
+## Linkage Desiquilibrium
+### popLDecay
+
+
+- Calculate Linkage Desquiblibrium decay until a window of maximuim 300kb. Note: It should be performed as well for smaller window sizes (10-15kb and 50kn for allowing a better overview of the decay)
+
+```bash
+VCF_FILE='../data/output/reheader_filtered_angsd_vcf_file.vcf.gz' # input VCF file
+OUTPUT_FILE='../data/processed/LDdecay_hypochondriacus' #output_name
+SUB_POP='../data/raw/samples_int_hypochondriacus' # list of samples for the subpopulation bein evaluated 
+
+PopLDdecay -InVCF $VCF_FILE -OutStat $OUTPUT_FILE -SubPop $SUB_POP -MaxDist 300
+```
+
+- plot (requites a Multipoplist : list of *stat.gz files generated for each file and its corresponding population for plotting. e.g. `/path/to/file/caudatus.stats.gz"\t"caudatus`
+
+
+```bash
+perl ../../../tools/PopLDdecay/bin/Plot_MultiPop.pl -inList ../data/processed/Multipoplist -output all_species_LD
+```
+
+
+
+## Treemix
+### File preparation
+- Create clust file using the format "SampleName"\t"SampleName"\t"Species"
+- Use plink to generate stratified frequencies file
+`plink_clust.sh`
+
+```bash
+
+source /home/jgoncal1/.bashrc
+module load miniconda/py38_4.9.2
+conda activate base_jgd
+
+
+VCF_FILE="../data/processed/filtered_reheader_prnned_sc16.vcf.gz"
+CLUST_FILE="file_lists/samples_geneflow_no_outgroup.clust"
+
+plink --vcf $VCF_FILE \
+--double-id \
+--freq \
+--allow-extra-chr \
+--within $CLUST_FILE \
+--make-bed \
+--pca \
+--geno \
+--mind 0.7 \
+--out ../data/processed/clust_annotated_filtered_reheader_prunned_sc16
+
+```
+gzip freq file
+```
+
+- Convert plink2treemix
+
+```bash
+python2.7 /projects/jgoncal1/tools/plink2treemix.py data/processed/plink_prunned/freqs_treemix_pop.frq.gz data/processed/treemix_input.gz
+```
+
+Note: In case of error:
+Remove "Scaffold_" for preventing ```plink2treemix` parsing errors
+
+```bash
+sed 's/Scaffold_//g' $strat_file > $fixed_start_file
+```
+
+- run treemix `treemix.sh`
+
+```bash
+source /home/jgoncal1/.bashrc
+module load miniconda/py38_4.9.2
+conda activate base_jgd
+module load gnu/7.4.0
+
+for i in {0..6};
+do
+treemix -i  ../data/processed/treemix_input.gz -k 500 -m $i -o ../data/processed/treemix_output_$i 
+done
+
+```
+
+- For plotting:
+
+Use the source code avialble [here](https://rdrr.io/github/andrewparkermorgan/popcorn/src/R/treemix.R)
+Note: To acmcomdate labels within the plot boundaries , I altered the code for the geom_text (l.105):
+`    p <- p + ggplot2::geom_text(ggplot2::aes(x = xo, y = y, label = pop), vjust="inward",hjust="inward")`
+
+```R
+source(file = "/path/to/treemix.R")
+tree<-read_treemix("treemix_output")
+plot_treemix(tree) 
+```

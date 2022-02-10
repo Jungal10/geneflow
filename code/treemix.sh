@@ -17,7 +17,7 @@ module load gnu/7.4.0
 
 for i in {0..6};
 do
-treemix -i  ../data/processed/input_treemix_without_tubercualtus.gz -k 500 -m $i -o ../data/processed/treemix_output_without_tubercualtus_$i  
+treemix -i  ../data/processed/new_treemix_input.gz -k 500 -m $i -o ../data/processed/new_treemix_output_with_outgroup_$i  
 done
 
 
