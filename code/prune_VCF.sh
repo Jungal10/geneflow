@@ -74,6 +74,7 @@ tabix -p vcf $OUTFILE.vcf.gz
 echo "VCF file zipped, rephased, tabix and ready $OUTFILE.vcf.gz"
 
 echo "removing intermideate lifes"
+ls ../data/processed/tmp_*
 rm ../data/processed/tmp_*
 
 echo "DONE"

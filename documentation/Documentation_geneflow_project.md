@@ -237,6 +237,65 @@ Dsuite Dinvestigate $VCF_FILE  sets.txt  test_trios.txt -w 10000,1
 
 For topoly inference:
 
+
+
+### Finescture and Chromossome Painting
+
+#### file preparation and setup
+- prepare recombfile. If not recombiantion map is available, make uniform recombinatoin file using:
+
+```perl ../../../../tools/bin/fs_4.1.1/makeuniformrecfile.pl  phased_plink_file out_recomb```
+
+- create plink file from phased VCF:
+
+```plink2chromopainter_step1.sh```
+
+```bash
+VCF_FILE='../data/processed/phased_susbset_introgression108_gatk_filter_maxmissing30_max_biallelic_vcftools_maxmissing07_maf005.vcf.gz'
+
+OUTFILE='../data/processed/plink_phased_susbset_introgression108_gatk_filter_maxmissing30_max_biallelic_vcftools_maxmissing07_maf005'
+
+for i in {1..16}; 
+do
+
+plink --vcf ../data/processed/VCF_subset_introgression108_Scaffold_${i}.recode.vcf \
+--double-id \
+--allow-extra-chr \
+--mind 0.7 \
+--recode 12 \
+--out ../data/processed/plink_phased_VCF_introgression108_Scaffold_${i}
+
+done
+```
+
+- convert plink files to chrompainter format
+
+```plink2chromopainter_step2.sh```
+
+
+- prepare recombfile. If not recombiantion map is available, make uniform recombinatoin file using:
+
+```perl ../../../../tools/bin/fs_4.1.1/makeuniformrecfile.pl  phased_plink_file out_recomb```
+
+
+
+
+After Chrompainter ran through:
+#### plot haplotypes
+
+**prepare input files for R**
+
+- split output haplotype file by each haplotype:
+
+```bash
+csplit -f hap_files/sc16_haplotypes -z <(gunzip -c cp2_withf_geneflow_spithyb_sc16.hap1.copyprobsperlocus.out.gz)  /HAP/ '{*}' 
+```
+
+- transform split files into naming recognized by the Rscript. This script will search for the "HAP 1" pattern on the file and create a seaprate file for each haplotype and each species. It is prepared for being recogneized by the further Rscript.
+
+```parsefile.sh```
+
+
 ## Linkage Desiquilibrium
 ### popLDecay
 

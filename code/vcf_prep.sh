@@ -28,13 +28,17 @@ echo "File list:
 echo "samples: "$samplesnames
 angsd_VCF=$2 # 
 echo "angsd vcf:" $angsd_VCF
-reheadered_angsd_VCF=reheader_$(basename $angsd_VCF)
-phased_VCF=phased_$(basename $reheadered_angsd_VCF | cut -f1 -d'.')
-annotated_VCF=annotated_$(basename phased_VCF | cut -f1 -d'.')
-echo "anotated VCF: ../data/processed/"$annotated_VCF
+reheadered_angsd_VCF=tmp_reheader_$(basename $angsd_VCF)
+annotated_VCF=tmp_annotated_$(basename $reheadered_angsd_VCF | cut -f1 -d'.')
+clust_VCF=tmp_clust_$(basename $annotated_VCF | cut -f1 -d'.')
+CLUST_FILE="file_lists/samples_geneflow.clust"
+phased_VCF=phased_$(basename $angsd_VCF | cut -f1 -d'.')
+reheadered_clust_VCF=tmp_reheader_$(basename $clust_VCF)
+
+
 
 echo "..."
-tabix -p vcf $angsd_VCF
+tabix -f -p vcf $angsd_VCF
 
 echo "finishing tabix angsd vcf"
 
@@ -47,18 +51,67 @@ echo "reheadered_VCF: "$reheadered_angsd_VCF
 
 echo "tabix rehedered VCF: "$reheadered_angsd_VCF".tbi"
 
+echo "annotating VCF"
+
+bcftools annotate --set-id +'%CHROM\_%POS' ../data/processed/$reheadered_angsd_VCF | bcftools view -O z -o ../data/processed/$annotated_VCF.vcf.gz
+
+echo "done annotated VCF: ../data/processed/"$annotated_VCF.vcf.gz
+
+echo "doing tabix on annotated VCF: ../data/processed/"$annotated_VCF.vcf.gz
+
+tabix -f -p vcf ../data/processed/$annotated_VCF.vcf.gz
+
+echo "done tabix on annotated VCF: ../data/processed/"$annotated_VCF.vcf.gz
+
+echo "doing plink clust"
+
+plink --vcf ../data/processed/$annotated_VCF.vcf.gz \
+--double-id \
+--freq \
+--allow-extra-chr \
+--within $CLUST_FILE \
+--make-bed \
+--pca \
+--geno \
+--mind 0.7 \
+--maf 0.02 \
+--recode vcf \
+--out ../data/processed/$clust_VCF
+
+
+echo "done plink clust"
+
+echo "bgzip on ../data/processed/"$clust_VCF.vcf
+
+bgzip ../data/processed/$clust_VCF.vcf
+
+
+echo "doing tabix on clust VCF: ../data/processed/"$clust_VCF.vcf.gz
+
+tabix -f -p vcf ../data/processed/$clust_VCF.vcf.gz
+
+echo "performing reheadering to fix double naming provoked by plink"
+
+bcftools reheader -s $samplesnames  ../data/processed/$clust_VCF.vcf.gz | bcftools view -Oz -o  ../data/processed/$reheadered_clust_VCF.vcf.gz
+
+echo "reheadered_clust_VCF: "$reheadered_clust_VCF.vcf.gz
+
+tabix -p vcf ../data/processed/$reheadered_clust_VCF.vcf.gz
+
+echo "tabix rehedered VCF: "$reheadered_clust_VCF".tbi"
+
+
+
 echo "phasing file"
 
 java -Xmx60000m -jar /projects/jgoncal1/tools/bin/beagle.28Jun21.220.jar \
-gt=../data/processed/$reheadered_angsd_VCF \
+gt=../data/processed/$reheadered_clust_VCF.vcf.gz \
 out=../data/processed/$phased_VCF
 
-echo "phased_VCF done: ../data/processed/"$phased_VCF".vcf.gz"
+echo "phased_VCF done: ../data/processed/"$phased_VCF
 tabix -f -p vcf ../data/processed/$phased_VCF.vcf.gz
 
-echo "annotating VCF"
-
-bcftools annotate --set-id +'%CHROM\_%POS' ../data/processed/$phased_VCF.vcf.gz | bcftools view -O z -o ../data/processed/$annotated_VCF.vcf.gz
-
-echo "done anotated VCF: ../data/processed/"$annotated_VCF.vcf.gz
-
+echo "file ready ../data/processed/"$phased_VCF.vcf.gz
+echo "removing temporary intermediate files:" 
+ll ../data/processed/tmp_*
+rm ../data/processed/tmp_*
