@@ -2,7 +2,7 @@
 #SBATCH --cpus-per-task=5
 #SBATCH --partition=smp-rh7 
 #SBATCH --mail-type=ALL
-#SBATCH --time=120:00:00
+#SBATCH --time=96:00:00
 #SBATCH --mem=168gb
 #SBATCH --account=UniKoeln
 #SBATCH --mail-user=jgoncal1@uni-koeln.de
