@@ -1,8 +1,8 @@
 #!/bin/bash -l
 #SBATCH --partition=smp-rh7
 #SBATCH --time=4:00:00
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=84gb
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=42gb
 #SBATCH --account=UniKoeln
 #SBATCH --mail-user=jgoncal1@uni-koeln.de
 #SBATCH --error /scratch/jgoncal1/logs/errors/prepare_prunnning_%j
@@ -23,7 +23,7 @@ fi
 
 
 VCF_FILE=$1
-PRUNNED_IN_SITES=../data/processed/forprunning_03_$(basename $VCF_FILE | cut -f1 -d'.')
+PRUNNED_IN_SITES=../data/processed/forprunning_03_$(basenasme $VCF_FILE | cut -f1 -d'.')
 PRUNNED_VCF=../data/processed/tmp_prunned_$(basename $VCF_FILE | cut -f1 -d'.')
 OUTFILE=../data/processed/ready_prunned_$(basename $VCF_FILE | cut -f1 -d'.')
 
@@ -78,5 +78,6 @@ ls ../data/processed/tmp_*
 rm ../data/processed/tmp_*
 
 echo "DONE"
+
 
 

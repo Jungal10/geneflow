@@ -23,12 +23,18 @@ export PYTHONPATH=$PYTHONPATH:/projects/jgoncal1/tools/bin/genomics_general/
 echo "Preparing vcf for being using in S.Martin pipleine"
 
 
-bcftools filter --set-GTs . ../data/processed/reheader_prunned_sc16.vcf.gz -O u | bcftools view -U -i 'TYPE=="snp" & MAC >= 2' -O z > ../data/processed/filtered_reheader_prunned_sc16.vcf.gz
+bcftools filter --set-GTs . ../data/processed/vcf_files/ready_dovcf_geneflowsamples_all_chr.vcf.gz -O u | bcftools view -U -i 'TYPE=="snp" & MAC >= 2' -O z > ../data/processed/vcf_files/filtered_full_genome.vcf.gz
 
-python parseVCF.py -i filtered_reheader_prunned_sc16.vcf.gz --skipIndels| gzip > output_filtered_reheader_prunned_sc16.geno.gz
+#requites a tabix file
 
-python phyml_sliding_windows.py -T 10 -g input.phased.geno.gz --prefix output.phyml_bionj.w50 -w 50 --windType sites --model GTR --optimise n
 
+echo "conversion to genotype fomrmat (slow for bigger files)"
+
+python /projects/jgoncal1/tools/bin/genomics_general/VCF_processing/parseVCF.py -i ../data/processed/vcf_files/filtered_full_genome.vcf.gz --skipIndels | gzip > ../data/processed/filtered_full_genome.geno.gz
+
+
+
+python /projects/jgoncal1/tools/bin/genomics_general/phylo/phyml_sliding_windows.py -T 10 -g ../data/processed/filtered_full_genome.geno.gz -p ../data/processed/remake_output.phmyl.w100  -w100  --windType sites --model GTR --optimise n
 
 
 python twisst.py -t output.sc16_withoutgroup.phyml_bionj.w50.trees.gz -w weights_output.sc16_withoutgroup.csv.gz --outputTopos trees_output.sc16_withoutgroup  -g caudatus -g cruentus -g hypochondriacus -g hybridus_CA -g hybridus_SA -g quitensis --outgroup ERR3220318_A --groupsFile ../../code/file_lists/samples_twist_tuberculatus

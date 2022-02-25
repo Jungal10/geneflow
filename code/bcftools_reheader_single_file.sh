@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --partition=devel
+#SBATCH --partition=devel-rh7
 #SBATCH --time=1:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=46gb
@@ -14,9 +14,9 @@ source /home/jgoncal1/.bashrc
 module load miniconda/py38_4.9.2
 conda activate base_jgd 
 
-vcf_file="../data/processed/ready_prunned_phased_reheader_dovcf_geneflowsamples_all_chr.vcf.gz"
+vcf_file="../data/processed/tmp_reheader_tmp_clust_tmp_annotated_tmp_reheader_phased_reheader_dovcf_geneflowsamples_all_chr.vcf.gz"
 samplesnames="file_lists/samples_geneflow.txt"
-output="../data/processed/reheader_ready_prunned_phased_reheader_dovcf_geneflowsamples_all_chr.vcf.gz"
+output="../data/processed/reheader_reheader_dovcf_geneflowsamples_all_chr.vcf.gz"
 
 
 bcftools reheader -s $samplesnames $vcf_file | bcftools view -Oz -o  $output

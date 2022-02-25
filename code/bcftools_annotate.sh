@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --partition=devel
+#SBATCH --partition=devel-rh7
 #SBATCH --time=1:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=46gb
@@ -9,6 +9,11 @@
 #SBATCH -o /scratch/jgoncal1/logs/bacftools_annotate_%j
 #SBATCH -D /projects/ag-stetter/jdias/projects/GeneFlow/code/
 
+
+
+source /home/jgoncal1/.bashrc
+module load miniconda/py38_4.9.2
+conda activate base_jgd
 
 ichr=0 #number of haplotypes identified per chrossome
 

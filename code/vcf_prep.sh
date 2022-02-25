@@ -1,12 +1,12 @@
 #!/bin/bash -l
-#SBATCH --partition=devel
-#SBATCH --time=1:00:00
+#SBATCH --partition=smp-rh7
+#SBATCH --time=24:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=46gb
 #SBATCH --account=UniKoeln
 #SBATCH --mail-user=jgoncal1@uni-koeln.de
-#SBATCH --error /scratch/jgoncal1/logs/errors/bacftools_reeahder_%j
-#SBATCH -o /scratch/jgoncal1/logs/bacftools_rehaeder%j
+#SBATCH --error /scratch/jgoncal1/logs/errors/vcf_preparation_%j
+#SBATCH -o /scratch/jgoncal1/logs/vcf_preparation_%j
 #SBATCH -D /projects/ag-stetter/jdias/projects/geneflow/code/
 
 

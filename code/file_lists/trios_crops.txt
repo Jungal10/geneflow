@@ -12,3 +12,7 @@ quitensis	caudatus	hypochondriacus
 hybridus_SA	caudatus	hypochondriacus
 caudatus	quitensis	hypochondriacus
 caudatus	hybridus_SA	hypochondriacus
+Hypochondriacus	quitens	caudatus
+Cruentus	quitenis	caudatus
+
+

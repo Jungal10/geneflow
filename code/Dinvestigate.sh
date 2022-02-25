@@ -16,7 +16,7 @@ module load gnu/7.4.0
 
 Dsuite Dinvestigate \
 -w 1000,1 \
--n Dsuite_Dinvestigate_w100_allchr_crops_trios \
-../data/processed/reheader_ready_prunned_phased_reheader_dovcf_geneflowsamples_all_chr.vcf.gz \
+-n Dsuite_Dinvestigate_w100_fullgenome_crops_trios \
+../data/processed/vcf_files/ready_dovcf_geneflowsamples_all_chr.vcf.gz \
 file_lists/list_amaranth_geneflow_samples_populations.txt \
 file_lists/trios_crops.txt

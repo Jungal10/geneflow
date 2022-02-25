@@ -47,3 +47,24 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+.DS_Store
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+node_modules
+.directory
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+Session.vim
+play.js
+coverage
+out
+.nyc_output
+docs/_site
+docs/.sass-cache
+.vscode

@@ -1,0 +1,3 @@
+hybridus_SA quitensis   caudatus
+quitensis   hybridus_SA caudatus
+caudatus    hybridus_SA quitensis
