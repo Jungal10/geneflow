@@ -17,18 +17,18 @@ conda activate base_jgd
 
 VCF_FILE='../data/processed/phased_VCF_angsd_tuberculatus_Scaffold_9.vcf.gz'
 
-OUTFILE='../data/processed/plink_phased_susbset_filtered_reheader_prunned_sc9  '
+OUTFILE='../data/processed/plink_phased_susbset_filtered_reheader_prunned_sc9'
 
-for i in {1..15}; 
+for i in {1..16}; 
 do
 
-plink --vcf ../data/processed/ready_prunned_phased_VCF_angsd_tuberculatus_Scaffold_${i}.vcf.gz \
+plink --vcf ../data/processed/vcf_files/q1ready_dovcf_geneflowsamples_Scaffold_${i}.vcf.gz \
 --double-id \
 --allow-extra-chr \
 --mind 0.7 \
 --recode 12 \
 --maf 0.02 \
---out ../data/processed/plink_phased_VCF_angsd_tuberculatus_Scaffold_${i}
+--out ../data/processed/fscp_input_files/plink_geneflowsamples_Scaffold_${i}
 
 done
 

@@ -1,0 +1,3 @@
+((caudatus,hybridus_SA),quitensis,Outgroup);
+((caudatus,quitensis),hybridus_SA,Outgroup);
+((caudatus,Outgroup),hybridus_SA,quitensis);

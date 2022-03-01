@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --partition=devel
+#SBATCH --partition=devel-rh7
 #SBATCH --time=1:00:00
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=46gb
@@ -9,12 +9,12 @@
 #SBATCH -o /scratch/jgoncal1/logs/mkaeunirecomb_%j
 #SBATCH -D /projects/ag-stetter/jdias/projects/GeneFlow/code/
 
-
 source /home/jgoncal1/.bashrc
-
+module load miniconda/py38_4.9.2
+conda activate fscp
 
 
 for i in $(seq 1 16); do
 # for chr in "Scaffold_"$i; do
-makeuniformrecfile.pl  ../data/processed/plink_phased_VCF_angsd_tuberculatus_Scaffold_${i}.phase ../data/processed/introgression108_Scaffold_${i}.recombfile
+makeuniformrecfile.pl  ../data/processed/fscp_input_files/plink_geneflowsamples_Scaffold_${i}.phase ../data/processed/fscp_input_files/geneflowsamples_Scaffold_${i}.recombfile
 done

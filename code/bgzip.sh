@@ -16,12 +16,13 @@ conda activate base_jgd
 
 for chr in {1..16}; do
 
-FILE=../data/processed/ready_dovcf_geneflowsamples_Scaffold_${chr}
+FILE=../data/processed/filtered_full_genomeScaffold_${chr}
 # echo $FILE 
 
-# bgzip $FILE 
+bgzip $FILE 
 
 mv $FILE.gz $FILE.vcf.gz
 
 tabix $FILE.vcf.gz
+
 done
