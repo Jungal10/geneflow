@@ -1,8 +1,8 @@
 #!/bin/bash -l
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=smp-rh7 
-#SBATCH --mem=84gb
-#SBATCH --time=72:00:00
+#SBATCH --mem=63gb
+#SBATCH --time=240:00:00
 #SBATCH --account=UniKoeln
 #SBATCH --mail-type=ALL
 #SBATCH --error /scratch/jgoncal1/logs/errors/abbababa_ind_full_genome_minmaf002_%j.err 

@@ -12,16 +12,24 @@
 
 
 
-for i in {1..16};
-do
+# for i in {1..16};
+# do
+
+# /projects/jgoncal1/tools/bin/fs_4.1.1/plink2chromopainter.pl \
+# -p ../data/processed/fscp_input_files/plink_geneflowsamples_Scaffold_${i}.ped \
+# -m ../data/processed/fscp_input_files/plink_geneflowsamples_Scaffold_${i}.map \
+# -o ../data/processed/fscp_input_files/plink_geneflowsamples_Scaffold_${i}.phase
+
+# done
+
+
+
+PED_FILE="../data/processed/plink_ready_dovcf_geneflowsamples_all_chr.ped"
+MAP_FILE="../data/processed/plink_ready_dovcf_geneflowsamples_all_chr.map"
+OUTPUT_FILE="../data/processed/plink_ready_dovcf_geneflowsamples_all_chr.phase"
+
 
 /projects/jgoncal1/tools/bin/fs_4.1.1/plink2chromopainter.pl \
--p ../data/processed/fscp_input_files/plink_geneflowsamples_Scaffold_${i}.ped \
--m ../data/processed/fscp_input_files/plink_geneflowsamples_Scaffold_${i}.map \
--o ../data/processed/fscp_input_files/plink_geneflowsamples_Scaffold_${i}.phase
-
-done
-
-# PED_FILE="../data/processed/plink_phased_susbset_introgression108_gatk_filter_maxmissing30_max_biallelic_vcftools_maxmissing07_maf005.ped"
-# MAP_FILE="../data/processed/plink_phased_susbset_introgression108_gatk_filter_maxmissing30_max_biallelic_vcftools_maxmissing07_maf005.map"
-# OUTPUT_FILE="../data/processed/plink_phased_susbset_introgression108_gatk_filter_maxmissing30_max_biallelic_vcftools_maxmissing07_maf005.phase"
+-p $PED_FILE
+-m $MAP_FILE
+-o $OUTPUT_FILE

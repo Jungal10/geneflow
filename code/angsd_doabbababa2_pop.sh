@@ -1,7 +1,7 @@
 #!/bin/bash -l
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=smp-rh7 
-#SBATCH --mem=84gb
+#SBATCH --mem=168gb
 #SBATCH --time=72:00:00
 #SBATCH --account=UniKoeln
 #SBATCH --mail-type=ALL

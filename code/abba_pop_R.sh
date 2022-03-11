@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --cpus-per-task=5
+#SBATCH --cpus-per-task=3
 #SBATCH --partition=smp-rh7 
 #SBATCH --mail-type=ALL
 #SBATCH --array=16-16
@@ -21,8 +21,8 @@ conda activate angsd_env
 module load R
 
 
-ABABABABA_FILE="../data/processed/abbababa2_pop_sc16_maf002.Angsd"
-OUTPUT_FILE="../data/processed/abba_pop_R_sc16"
+ABABABABA_FILE="../data/processed/abbababa2_pop_full_genome_maf002.Angsd"
+OUTPUT_FILE="../data/processed/angsd_abbabaaba_out/abba_pop_R_full_genome"
 SIZEFILE="file_lists/gene_flow_tuberculatus.size"
 POPNAMES="file_lists/gene_flow_tuberculatus.name"
 ERROFILE="file_lists/errorList.error"

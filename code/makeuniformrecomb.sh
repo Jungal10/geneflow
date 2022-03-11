@@ -5,8 +5,8 @@
 #SBATCH --mem=46gb
 #SBATCH --account=UniKoeln
 #SBATCH --mail-user=jgoncal1@uni-koeln.de
-#SBATCH --error /scratch/jgoncal1/logs/errors/mkaeunirecomb_%j
-#SBATCH -o /scratch/jgoncal1/logs/mkaeunirecomb_%j
+#SBATCH --error /scratch/jgoncal1/logs/errors/makeunirecomb_%j
+#SBATCH -o /scratch/jgoncal1/logs/makeunirecomb_%j
 #SBATCH -D /projects/ag-stetter/jdias/projects/GeneFlow/code/
 
 source /home/jgoncal1/.bashrc
@@ -15,6 +15,7 @@ conda activate fscp
 
 
 for i in $(seq 1 16); do
-# for chr in "Scaffold_"$i; do
-makeuniformrecfile.pl  ../data/processed/fscp_input_files/plink_geneflowsamples_Scaffold_${i}.phase ../data/processed/fscp_input_files/geneflowsamples_Scaffold_${i}.recombfile
+for chr in "Scaffold_"$i; do
+makeuniformrecfile.pl  ../data/processed/fscp_input_files/plink_geneflowsamples_${chr}.phase ../data/processed/fscp_input_files/geneflowsamples_Scaffold_${chr}.recombfile
+done
 done
