@@ -1,0 +1,5 @@
+hybridus_CA	hypochondriacus	caudatus
+hybridus_CA	cruentus	caudatus
+hybridus_CA	hypochondriacus	caudatus
+hybridus_CA	cruentus	caudatus
+
