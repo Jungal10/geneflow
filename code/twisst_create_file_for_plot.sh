@@ -16,4 +16,4 @@ module load miniconda/py38_4.9.2
 conda activate ete3
 
 
-python /projects/jgoncal1/tools/bin/twisst/twisst.py -t ../data/processed/twisst/remake_output_Sc9_full_genome.phmyl.w100.trees.gz -w ../data/processed/twisst/remake_output_Sc9_full_genome.phmyl.w100.data.tsv  --outputTopos ../data/processed/twisst/trees_output_scaffold9  -g caudatus -g hybridus_SA -g quitensis -g Outgroup  --outgroup Outgroup --groupsFile file_lists/all_samples_twisst.txt  --method complete 
+python /projects/jgoncal1/tools/bin/twisst/twisst.py -t ../data/processed/twisst/remake_output_Sc9_full_genome.phmyl.w100.trees.gz -w ../data/processed/twisst/remake_output_Sc9_full_genome.phmyl.w100.data.tsv  --outputTopos ../data/processed/twisst/trees_output_scaffold9_SA_with_CA  -g caudatus -g hybridus_SA -g quitensis -g hybridus_CA -g Outgroup --outgroup Outgroup --groupsFile file_lists/all_samples_twisst.txt  --method complete 

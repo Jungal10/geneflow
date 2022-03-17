@@ -1,0 +1,14 @@
+(Outgroup((quitensis,caudatus),(cruentus)));
+(Outgroup((hybridus_SA,caudatus),(cruentus)));
+(Outgroup((quitensis,caudatus),(hypochondriacus)));
+(Outgroup((hybridus_SA,caudatus),(hypochondriacus)));
+(Outgroup((cruentus,hypochondriacus),(caudatus)));
+(Outgroup((hypochondriacus,cruentus),(caudatus)));
+(Outgroup((hybridus_CA,cruentus),(caudatus)));
+(Outgroup((hybridus_CA,hypochondriacus),(caudatus)));
+(Outgroup((hybridus_CA,hypochondriacus),(cruentus)));
+(Outgroup((hybridus_CA,quitensis),(hypochondriacus)));
+(Outgroup((quitensis,hybridus_SA),(caudatus)));
+(Outgroup((hybridus_SA,quitensis),(caudatus)));
+(Outgroup((caudatus,quitensis),(hybridus_SA)));
+(Outgroup((quitensis,caudatus),(hybridus_SA)));
