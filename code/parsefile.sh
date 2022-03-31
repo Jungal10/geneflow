@@ -2,7 +2,7 @@
 
 
 i=0
-split_files_prefix="/scratch/jgd_hap_data/sc3_haplotypes"
+split_files_prefix="../data/processed/sc1_haplotypes"
 species="caudatus cruentus hypochondriacus hybridus_CA hybridus_SA quitensis"
 for s in $species; do
 files=(` grep "HAP 1 $s" $split_files_prefix* | cut -d ":" -f1 `)
@@ -21,4 +21,5 @@ index=$(( index + 1 ))
 done
 done
 
-rm $split_files_prefix[0-9]*
+rm $split_files_prefix[0-9]
+rm $split_files_prefix[0-9][0-9]

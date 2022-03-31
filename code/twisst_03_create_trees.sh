@@ -15,4 +15,6 @@ module load miniconda/py38_4.9.2
 conda activate base_jgd 
 
 
+export PYTHONPATH=$PYTHONPATH:/projects/jgoncal1/tools/bin/genomics_general/
+
 python /projects/jgoncal1/tools/bin/genomics_general/phylo/phyml_sliding_windows.py -T 10 -g ../data/processed/twisst/filtered_full_genomeScaffold_3.geno.gz -p ../data/processed/twisst/filtered_Scaffold3_output.phmyl.w100  --outgroup ERR3220318 -w100  --windType sites --model GTR --optimise n

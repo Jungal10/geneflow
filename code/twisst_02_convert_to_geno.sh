@@ -14,5 +14,8 @@ source /home/jgoncal1/.bashrc
 module load miniconda/py38_4.9.2
 conda activate base_jgd 
 
+export PYTHONPATH=$PYTHONPATH:/projects/jgoncal1/tools/bin/genomics_general/
+
+
 
 python /projects/jgoncal1/tools/bin/genomics_general/VCF_processing/parseVCF.py -i ../data/processed/twisst/filtered_full_genomeScaffold_16.vcf.gz --skipIndels | gzip > ../data/processed/filtered_full_genomeScaffold_16.geno.gz

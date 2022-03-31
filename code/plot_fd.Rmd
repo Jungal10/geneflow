@@ -1,0 +1,560 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+packages loading
+
+```{r, eval= FALSE, echo=FALSE}
+library(cowplot)
+library(ggplot2)
+library(data.table)
+library(tidyverse)
+library(dplyr)
+ind.abba.cols<- c("caudatus"="#a6cee3", "cruentus"="#1f78b4", "hypochondriacus"="#b2df8a", "hybridus_CA"="#33a02c","hybridus_SA"="#fdbf6f", "quitensis"="#fb9a99")
+
+
+nice_layout<-   
+  #   panel_border(color = "#ffffff", size = 1, linetype = 1,
+  # remove = TRUE, "black") +
+  theme(strip.background = element_rect(fill = "#ffffff"), text = element_text(size = 30))
+
+
+
+```
+
+```{r}
+getwd()
+
+# crops_tree<- fread("../data/processed/dsuite_out/cruentus_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w50_sc16_50_1.txt") %>%
+  crops_tree<- fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/Dsuite_out/cruentus_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w100_fullgenome_crops_trios_100_1.txt") 
+    # filter(chr=="Scaffold_16") %>%
+  # filter(D>0) %>%
+  # filter(f_d>0) %>%
+  # filter(f_dM>0) %>%
+    mutate(window_center=(windowStart+windowEnd/2))
+
+# crops_tree_switched<-fread("../data/processed/dsuite_out/hypochondriacus_cruentus_caudatus_localFstats_Dsuite_Dinvestigate_w100_fullgenome_crops_trios_100_1.txt") %>%
+    crops_tree_switched<- fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/Dsuite_out/hybridus_CA_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w100_fullgenome_crops_trios_100_1.txt") %>%
+    filter(chr=="Scaffold_16") %>%
+  # filter(D>0) %>%
+  # filter(f_d>0) %>%
+  # filter(f_dM>0) %>%
+    mutate(window_center=(windowStart+windowEnd/2))
+
+# 
+# 
+# crops_tree_w1000<-fread("../data/processed/dsuite_out/cruentus_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w1000_sc16_extended_trios_1000_100.txt") %>%
+#   filter(D>0) %>%
+#   filter(f_d>0) %>%
+#   filter(f_dM>0) %>%
+#     mutate(window_center=(windowStart+windowEnd/2))
+# 
+# crops_tree_switched_w1000<-fread("../data/processed/dsuite_out/hypochondriacus_cruentus_caudatus_localFstats_Dsuite_Dinvestigate_w1000_sc16_extended_trios_1000_100.txt") %>%
+#   filter(D>0) %>%
+#   filter(f_d>0) %>%
+#   filter(f_dM>0) %>%
+#     mutate(window_center=(windowStart+windowEnd/2))
+# 
+# 
+# hyb_cru_cau_tree<-fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/Dsuite_out/hybridus_CA_cruentus_caudatus_localFstats_Dsuite_Dinvestigate_w100_fullgenome_crops_trios_100_1.txt")
+#     filter(D>=0) %>%
+#   filter(f_d>=0) %>%
+#   filter(f_dM>=0) %>%
+#     mutate(window_center=(windowStart+windowEnd/2))
+# 
+# 
+# hyb_hyp_cau_tree<-fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/Dsuite_out/hybridus_CA_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w100_fullgenome_crops_trios_100_1.txt") 
+#     filter(D>0) %>%
+#   filter(f_d>0) %>%
+#   filter(f_dM>0) %>%
+#     mutate(window_center=(windowStart+windowEnd/2))
+
+
+```
+
+
+
+
+
+
+```{r}
+
+top_windowss_crops_tree <-  crops_tree %>%
+                 filter(f_dM>quantile(crops_tree$f_dM, .99)) 
+
+top_windowss_crops_tree %>%
+  filter(chr=="Scaffold_16")
+
+top_windowss_crops_tree
+
+
+crops_tree   %>%
+filter(chr=="Scaffold_16") %>%
+  summarise(max(windowEnd))
+
+
+top_window_crop_tree<- crops_tree %>% 
+               filter(f_dM>quantile(crops_tree$f_dM, .99)) %>%
+
+             # filter(f_dM>quantile(crops_tree$f_dM, .99) | f_dM<quantile(crops_tree$f_dM, .01)) %>%
+          mutate(Position = windowEnd/1e6)
+
+
+
+top_window_crop_tree_switched<- crops_tree_switched %>% 
+               filter(f_dM>quantile(crops_tree_switched$f_dM, .99)) %>%
+             # filter(f_dM>quantile(crops_tree_switched$f_dM, .99) | f_dM<quantile(crops_tree_switched$f_dM, .01)) %>%
+          mutate(Position = windowEnd/1e6)
+
+
+
+crops_tree<- crops_tree %>%
+  filter(f_dM >0) %>%
+    mutate(Position = windowEnd/1e6)
+
+crops_tree_switched <- crops_tree_switched %>%
+    filter(f_dM >0) %>%
+        mutate(Position = windowEnd/1e6)
+
+
+
+plot_fdm<-  
+  ggplot() +
+geom_point(data=crops_tree, aes(x=Position, y=f_dM),color = "#808080", alpha=0.1)  +
+  geom_point(data=top_window_crop_tree, 
+             aes(x=Position,y=f_dM), 
+             color='#b2df8a',
+             size=3) +
+  geom_line(data=crops_tree, aes(x=Position, y=quantile(crops_tree$f_dM, .99)), color="#b2df8a",  linetype="dashed") +
+    # geom_line(data=crops_tree, aes(x=Position, y=quantile(crops_tree$f_dM, .01)), color="#b2df8a",  linetype="dashed") +
+    geom_point(data=crops_tree_switched, aes(x=Position, y=f_dM),color = "#808080", alpha=0.3)  +
+  geom_point(data=top_window_crop_tree_switched, 
+             aes(x=Position,y=f_dM), 
+             color='#1f78b4',
+             size=3) +
+  geom_line(data=crops_tree_switched, aes(x=Position, y=quantile(crops_tree_switched$f_dM, .99)), color="#1f78b4",  linetype="dashed") +
+    # geom_line(data=crops_tree_switched, aes(x=Position, y=quantile(crops_tree_switched$f_dM, .01)), color="#1f78b4",  linetype="dashed") +
+    theme_bw() +
+     theme( text = element_text(size = 30)) +
+    labs(title = "fdM caudatus gene flow into crops") +
+    xlab("Position on chromossome 16 (Mb)") +
+   guides(fill=guide_legend(title="crop")) +
+        geom_vline(xintercept=0.976,linetype='dashed', color='red', size=0.5) +
+    geom_vline(xintercept=0.989, linetype='dashed', color='red', size=0.5) 
+
+plot_fdm
+
+ggsave("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/fdm_hyp_cru_cau__cru_hyp_cau_sc16_vline.png", plot_fdm, width = 12, height =6)
+
+```
+
+
+zoom in QTL 16
+
+
+```{r}
+
+crops_tree_QTL_16 <- crops_tree %>%
+  filter(windowEnd<1050000) %>%
+  filter(windowStart > 900000)
+
+
+crops_tree_switched_QTL_16 <- crops_tree_switched %>%
+  filter(windowEnd<1050000) %>%
+  filter(windowStart > 900000)
+
+
+
+top_window_crop_tree<- crops_tree %>% 
+               filter(f_dM>quantile(crops_tree$f_dM, .99)) %>%
+
+             # filter(f_dM>quantile(crops_tree$f_dM, .99) | f_dM<quantile(crops_tree$f_dM, .01)) %>%
+          mutate(Position = windowEnd/1e6) %>%
+    filter(windowEnd<1050000) %>%
+  filter(windowStart > 900000)
+
+
+
+
+top_window_crop_tree_switched<- crops_tree_switched %>% 
+               filter(f_dM>quantile(crops_tree_switched$f_dM, .99)) %>%
+             # filter(f_dM>quantile(crops_tree_switched$f_dM, .99) | f_dM<quantile(crops_tree_switched$f_dM, .01)) %>%
+          mutate(Position = windowEnd/1e6) %>%
+    filter(windowEnd<1050000) %>%
+  filter(windowStart > 900000)
+
+
+
+
+
+plot_fdm_QTL16<-  
+  ggplot() +
+geom_point(data=crops_tree_QTL_16, aes(x=windowStart, y=f_dM),color = "#808080", alpha=0.1)  +
+  geom_point(data=top_window_crop_tree, 
+             aes(x=windowStart,y=f_dM), 
+             color='#b2df8a',
+             size=3) +
+  geom_line(data=crops_tree_QTL_16, aes(x=windowStart, y=quantile(crops_tree$f_dM, .99)), color="#b2df8a",  linetype="dashed") +
+    # geom_line(data=crops_tree, aes(x=Position, y=quantile(crops_tree$f_dM, .01)), color="#b2df8a",  linetype="dashed") +
+    geom_point(data=crops_tree_switched_QTL_16, aes(x=windowStart, y=f_dM),color = "#808080", alpha=0.3)  +
+  geom_point(data=top_window_crop_tree_switched, 
+             aes(x=Position,y=f_dM), 
+             color='#1f78b4',
+             size=3) +
+  geom_line(data=crops_tree_switched_QTL_16, aes(x=windowStart, y=quantile(crops_tree_switched$f_dM, .99)), color="#1f78b4",  linetype="dashed") +
+    # geom_line(data=crops_tree_switched, aes(x=Position, y=quantile(crops_tree_switched$f_dM, .01)), color="#1f78b4",  linetype="dashed") +
+    theme_bw() +
+     theme( text = element_text(size = 30)) +
+    labs(title = "fdM caudatus gene flow into crops") +
+    xlab("Position on chromossome 16 (bp)") +
+   guides(fill=guide_legend(title="crop")) +
+        geom_vline(xintercept=976000,linetype='dashed', color='red', size=0.5) +
+    geom_vline(xintercept=989000, linetype='dashed', color='red', size=0.5) 
+
+plot_fdm_QTL16
+
+options(scipen = 999)
+
+ggsave("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/fdm_hyp_cru_cau__cru_hyp_cau_QT:16_highlighted.png", plot_fdm, width = 12, height =6)
+
+  
+```
+
+
+
+```{r}
+
+crops_tree_cru_hyp_cau<- fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/Dsuite_out/cruentus_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w100_fullgenome_crops_trios_100_1.txt") 
+
+```
+
+
+```{r}
+
+crops_tree_cru_hyp_cau_sc3<- crops_tree_cru_hyp_cau %>%
+      filter(chr=="Scaffold_3") %>%
+          mutate(Position = windowEnd/1e6)
+
+
+top_window_crops_tree_cru_hyp_cau_sc3<- crops_tree_cru_hyp_cau_sc3 %>% 
+             filter(f_dM>quantile(crops_tree_cru_hyp_cau_sc3$f_dM, .99))  %>%
+          mutate(Position = windowEnd/1e6)
+
+
+
+bottomn_window_crops_tree_cru_hyp_cau_sc3<- crops_tree_cru_hyp_cau_sc3 %>% 
+             filter(f_dM<quantile(crops_tree_cru_hyp_cau_sc3$f_dM, .01)) %>%
+          mutate(Position = windowEnd/1e6)
+
+
+  
+
+plot_fdm_crops_tree_cru_hyp_cau_sc3 <-  
+  ggplot() +
+geom_point(data=crops_tree_cru_hyp_cau_sc3, aes(x=windowEnd, y=f_dM),color = "#808080", alpha=0.1)  +
+  geom_point(data=top_window_crops_tree_cru_hyp_cau_sc3, 
+             aes(x=windowEnd,y=f_dM), 
+             color='#1f78b4',
+             size=3) +
+    geom_point(data=bottomn_window_crops_tree_cru_hyp_cau_sc3, 
+             aes(x=windowEnd,y=f_dM), 
+             color='#b2df8a',
+             size=3) +
+  geom_line(data=crops_tree_cru_hyp_cau_sc3, aes(x=windowEnd, y=quantile(crops_tree_cru_hyp_cau_sc3$f_dM, .99)), color="#1f78b4",  linetype="dashed") +
+    geom_line(data=crops_tree_cru_hyp_cau_sc3, aes(x=windowEnd, y=quantile(crops_tree_cru_hyp_cau_sc3$f_dM, .01)), color="#b2df8a",  linetype="dashed") +
+       theme( text = element_text(size = 30)) +
+    labs(title = "fdM ((cruentus,hybridus),(caudatus))") +
+    xlab("Position on chromossome 3 (Mb)") +
+  geom_vline(xintercept=5881516,linetype='dashed', color='red', size=0.5) +
+    geom_vline(xintercept=5966304, linetype='dashed', color='red', size=0.5) +
+      theme_bw()
+
+
+
+plot_fdm_crops_tree_cru_hyp_cau_sc3
+
+ggsave("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/fdm_cru_hyp_cau_sc3.png", plot_fdm_crops_tree_cru_hyp_cau_sc3, width = 12, height =6)
+
+
+```
+
+
+##QTL 3 5,881,516−5,966,304
+
+```{r}
+crops_tree_cru_hyp_cau_QTL3<- crops_tree_cru_hyp_cau_sc3 %>%
+filter(windowEnd<6000000) %>%
+  filter(windowEnd>5850000) %>%
+  mutate(Position = windowEnd/1e6)
+
+
+top_window_crops_tree_cru_hyp_cau_QTL3<- crops_tree_cru_hyp_cau_sc3 %>% 
+             filter(f_dM>quantile(crops_tree_cru_hyp_cau_sc3$f_dM, .99))%>%
+  filter(windowEnd<6000000) %>%
+  filter(windowEnd>5850000) %>%
+          mutate(Position = windowEnd/1e6)
+
+bottomn_window_crops_tree_cru_hyp_cau_QTL3<- crops_tree_cru_hyp_cau_sc3 %>% 
+             filter(f_dM<quantile(crops_tree_cru_hyp_cau_sc3$f_dM, .01)) %>%
+    filter(windowEnd<6000000) %>%
+  filter(windowEnd>5850000) %>%
+          mutate(Position = windowEnd/1e6)
+
+
+
+
+  
+
+plot_fdm_crops_tree_cru_hyp_cau_QTL3 <-  
+  ggplot() +
+geom_point(data=crops_tree_cru_hyp_cau_QTL3, aes(x=windowEnd, y=f_dM),color = "#808080", alpha=0.1)  +
+  geom_point(data=top_window_crops_tree_cru_hyp_cau_QTL3, 
+             aes(x=windowEnd,y=f_dM), 
+             color='#1f78b4',
+             size=3) +
+      geom_point(data=bottomn_window_crops_tree_cru_hyp_cau_QTL3, 
+             aes(x=windowEnd,y=f_dM), 
+             color='#b2df8a',
+             size=3) +
+  geom_line(data=top_window_crops_tree_cru_hyp_cau_QTL3, aes(x=windowEnd, y=quantile(crops_tree_cru_hyp_cau_sc3$f_dM, .99)), color="#b2df8a",  linetype="dashed") +
+    geom_line(data=top_window_crops_tree_cru_hyp_cau_QTL3, aes(x=windowEnd, y=quantile(crops_tree_cru_hyp_cau_sc3$f_dM, .01)), color="#b2df8a",  linetype="dashed") +
+       theme( text = element_text(size = 30)) +
+    labs(title = "fdM ((cruentus,hybridus),(caudatus)), QTL 3") +
+    xlab("Position on chromossome 3 (Mb)") +
+  geom_vline(xintercept=5881516,linetype='dashed', color='red', size=0.5) +
+    geom_vline(xintercept=5966304, linetype='dashed', color='red', size=0.5) +
+      theme_bw()
+
+
+
+
+plot_fdm_crops_tree_cru_hyp_cau_QTL3
+
+
+ggsave("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/fdm_cru_hyp_cau_QTL3.png", plot_fdm_crops_tree_cru_hyp_cau_QTL3, width = 12, height =6)
+
+
+```
+
+
+
+## QTL 9
+
+
+```{r}
+
+crops_tree_cru_hyp_cau_sc9<- crops_tree_cru_hyp_cau %>%
+      filter(chr=="Scaffold_9") %>%
+          mutate(Position = windowEnd/1e6)
+
+
+top_window_crops_tree_cru_hyp_cau_sc9<- crops_tree_cru_hyp_cau_sc9 %>% 
+             filter(f_dM>quantile(crops_tree_cru_hyp_cau_sc9$f_dM, .99))  %>%
+          mutate(Position = windowEnd/1e6)
+
+
+
+bottomn_window_crops_tree_cru_hyp_cau_sc9<- crops_tree_cru_hyp_cau_sc9 %>% 
+             filter(f_dM<quantile(crops_tree_cru_hyp_cau_sc9$f_dM, .01)) %>%
+          mutate(Position = windowEnd/1e6)
+
+
+  
+
+plot_fdm_crops_tree_cru_hyp_cau_sc9 <-  
+  ggplot() +
+geom_point(data=crops_tree_cru_hyp_cau_sc9, aes(x=windowEnd, y=f_dM),color = "#808080", alpha=0.1)  +
+  geom_point(data=top_window_crops_tree_cru_hyp_cau_sc9, 
+             aes(x=windowEnd,y=f_dM), 
+             color='#1f78b4',
+             size=3) +
+    geom_point(data=bottomn_window_crops_tree_cru_hyp_cau_sc9, 
+             aes(x=windowEnd,y=f_dM), 
+             color='#b2df8a',
+             size=3) +
+  geom_line(data=crops_tree_cru_hyp_cau_sc9, aes(x=windowEnd, y=quantile(crops_tree_cru_hyp_cau_sc9$f_dM, .99)), color="#1f78b4",  linetype="dashed") +
+    geom_line(data=crops_tree_cru_hyp_cau_sc9, aes(x=windowEnd, y=quantile(crops_tree_cru_hyp_cau_sc9$f_dM, .01)), color="#b2df8a",  linetype="dashed") +
+       theme( text = element_text(size = 30)) +
+    labs(title = "fdM ((cruentus,hybridus),(caudatus))") +
+    xlab("Position on chromossome 9 (Mb)") +
+  geom_vline(xintercept= 14260388,linetype='dashed', color='red', size=0.5) +
+    geom_vline(xintercept=14855666, linetype='dashed', color='red', size=0.5) +  
+      theme_bw()
+
+
+
+plot_fdm_crops_tree_cru_hyp_cau_sc9
+
+ggsave("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/fdm_cru_hyp_cau_sc9.png", plot_fdm_crops_tree_cru_hyp_cau_sc9, width = 12, height =6)
+
+
+```
+
+
+##QTL 3 5,881,516−5,966,304
+
+```{r}
+crops_tree_cru_hyp_cau_QTL9<- crops_tree_cru_hyp_cau_sc9 %>%
+  filter(windowEnd<14900000) %>%
+  filter(windowEnd>14200000) %>%
+  mutate(Position = windowEnd/1e6)
+
+
+top_window_crops_tree_cru_hyp_cau_QTL9<- crops_tree_cru_hyp_cau_sc3 %>% 
+             filter(f_dM>quantile(crops_tree_cru_hyp_cau_sc9$f_dM, .99))%>%
+  filter(windowEnd<14900000) %>%
+  filter(windowEnd>14200000) %>%
+          mutate(Position = windowEnd/1e6)
+
+bottomn_window_crops_tree_cru_hyp_cau_QTL9<- crops_tree_cru_hyp_cau_sc9 %>% 
+             filter(f_dM<quantile(crops_tree_cru_hyp_cau_sc9$f_dM, .01)) %>%
+  filter(windowEnd<14900000) %>%
+  filter(windowEnd>14200000) %>%
+          mutate(Position = windowEnd/1e6)
+
+
+
+
+  
+
+plot_fdm_crops_tree_cru_hyp_cau_QTL9 <-  
+  ggplot() +
+geom_point(data=crops_tree_cru_hyp_cau_QTL9, aes(x=windowEnd, y=f_dM),color = "#808080", alpha=0.1)  +
+  geom_point(data=top_window_crops_tree_cru_hyp_cau_QTL9, 
+             aes(x=windowEnd,y=f_dM), 
+             color='#1f78b4',
+             size=3) +
+      geom_point(data=bottomn_window_crops_tree_cru_hyp_cau_QTL9, 
+             aes(x=windowEnd,y=f_dM), 
+             color='#b2df8a',
+             size=3) +
+  geom_line(data=top_window_crops_tree_cru_hyp_cau_QTL3, aes(x=windowEnd, y=quantile(crops_tree_cru_hyp_cau_sc3$f_dM, .99)), color="#b2df8a",  linetype="dashed") +
+    geom_line(data=top_window_crops_tree_cru_hyp_cau_QTL3, aes(x=windowEnd, y=quantile(crops_tree_cru_hyp_cau_sc3$f_dM, .01)), color="#b2df8a",  linetype="dashed") +
+       theme( text = element_text(size = 30)) +
+    labs(title = "fdM ((cruentus,hybridus),(caudatus)), QTL 9") +
+    xlab("Position on chromossome 9 (Mb)") +
+  geom_vline(xintercept= 14260388,linetype='dashed', color='red', size=0.5) +
+    geom_vline(xintercept=14855666, linetype='dashed', color='red', size=0.5) +  
+      theme_bw()
+
+
+
+
+plot_fdm_crops_tree_cru_hyp_cau_QTL9
+
+
+ggsave("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/fdm_cru_hyp_cau_QTL9.png", plot_fdm_crops_tree_cru_hyp_cau_QTL9, width = 12, height =6)
+
+
+```
+
+
+# code from before
+```{r}
+
+top_window_hyb_hyp_cau<- hyb_hyp_cau_tree_w1000 %>% 
+             filter(f_dM>=quantile(hyb_hyp_cau_tree_w1000$f_dM, .95))
+               
+hyb_hyp_cau_tree_w1000<- hyb_hyp_cau_tree_w1000  %>%
+    mutate(Position = windowEnd/1e6)
+  # filter(f_dM > 0.134597795) %>%
+
+
+plot_fdm<-  ggplot() +
+geom_point(data=hyb_hyp_cau_tree_w1000, aes(x=Position, y=f_dM),color = "#b2df8a", alpha=0.3)  +
+  geom_point(data=top_window_hyb_hyp_cau, 
+             aes(x=Position,y=f_dM), 
+             color='#b2df8a',
+             size=3) +
+  geom_line(data=hyb_hyp_cau_tree_w1000, aes(x=Position, y=quantile(hyb_hyp_cau_tree_w1000$f_dM, .95)), color="#b2df8a",  linetype="dashed") +
+    geom_point(data=hyb_cru_cau_tree_w1000, aes(x=Position, y=f_dM),color = "#1f78b4", alpha=0.3)  +
+  geom_point(data=top_windows_hyb_cru_cau, 
+             aes(x=Position,y=f_dM),9
+             color='#1f78b4',
+             size=3) +
+  geom_line(data=hyb_cru_cau_tree_w1000, aes(x=Position, y=quantile(hyb_cru_cau_tree_w1000$f_dM, .95)), color="#1f78b4",  linetype="dashed") +
+    theme_bw() +
+     theme( text = element_text(size = 30)) +
+    labs(title = "fdM caudatus gene flow into crops") +
+    xlab("Position on chromossome 16 (Mb)") +
+   guides(fill=guide_legend(title="crop"))
+
+
+  ggsave("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/fdm_cruenuts_hypochondriacus_caudatus.png", plot_fdm, width = 14, height = 7)
+
+    
+
+top_windows_hyb_cru_cau<- hyb_cru_cau_tree_w1000 %>% 
+             filter(f_dM>=quantile(hyb_cru_cau_tree_w1000$f_dM, .95))
+               
+hyb_cru_cau_tree_w1000 <- hyb_cru_cau_tree_w1000 %>%
+    mutate(Position = windowEnd/1e6)
+
+  # filter(f_dM > 0.134597795) %>%
+  ggplot() +
+geom_point(data=hyb_cru_cau_tree_w1000, aes(x=windowEnd, y=f_dM),color = "1f78b4", alpha=0.3)  +
+  geom_point(data=top_windows, 
+             aes(x=windowEnd,y=f_dM), 
+             color='red',
+             size=3) +
+  geom_line(data=hyb_cru_cau_tree_w1000, aes(x=windowEnd, y=quantile(hyb_cru_cau_tree_w1000$f_dM, .95)), color="1f78b4",  linetype="dashed") +
+  # scale_colour_manual(labels = c("<3000", ">3000"), values=c('blue', 'red')) + 
+  theme_cowplot() +
+    labs(title = "fdM cruentus-caudatus")
+    geom_text(show.legend = F, title="cruentus-caudatus")
+
+
+    
+
+hyb_cru_cau_tree_w1000 %>%
+  arrange(f_dM, desc=T) %>%
+  filter(windowStart<5000000)
+
+
+  
+  
+```
+
+```{r}
+
+
+
+hyb_hyp_cau_tree_w1000 %>%
+    filter(f_dM > quantile(f_dM, .08))
+
+  group_by(window_center) %>% 
+ select(f_dM, window_center) %>% 
+ arrange(desc(f_dM)) %>%
+  filter(f_dM > quantile(f_dM, .08))
+
+crops_tree_switched<- crops_tree_switched %>%
+  mutate(window_center=(windowStart+windowEnd/2))
+
+
+  ggplot(NULL) +
+  geom_point(data=crops_tree_w1000, aes(x=window_center, y=f_dMM, color="blue")) +
+  geom_point(data=crops_tree_switched_w1000, aes(x=window_center, y=f_dMM, color="red")) +
+scale_color_manual(
+    values = c("red", "blue"),
+    labels = c("hyp_cru_cau", "cru_hyp_cau" )) +
+  theme_cowplot()
+  
+  
+  
+   crops_tree_w1000 %>%
+        # filter(f_dM<1 & f_dM >-1) %>%
+  ggplot()   +  
+    geom_point(aes(x=window_center, y=f_d), col="blue") +
+    geom_line(data = crops_tree_switched_w1000, aes(x=window_center, y=mean(f_d)), col="blue", linetype="dashed") +
+    geom_point( aes(x=window_center, y=D), col="red") +
+        geom_line(data = crops_tree_switched_w1000, aes(x=window_center, y=mean(D)), col="red", linetype="dashed") +
+      geom_point( aes(x=window_center, y=f_dM), col="green") +
+            geom_line(data = crops_tree_switched_w1000, aes(x=window_center, y=mean(D)), col="green", linetype="dashed") +
+nice_layout   
+   
+```
+
+

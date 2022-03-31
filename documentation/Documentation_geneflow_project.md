@@ -28,9 +28,8 @@
 
 ## Data sampling
 
-For the stufy a total of 108 samples were included — 33 *A. caudatus*, 21 *A. cruentus*, 5 *A. hybridus* from Central America, 4 *A. hybridus* from South America, 21 *A. hypochondriacus*. 24 *A. quitensis*. The resquncing data was obtaqined from Stetter et.a, 2020. Furhtermore, 1 individual was used as the outgroup, *A. tuberculatus*. The fastq file was obtained from Kreiner et al., 2019 and later aligned with the amaranth reference genome (Lightfoot et.al 2017) using bwa-mem.
+For the study a total of 108 samples were included — 33 *A. caudatus*, 21 *A. cruentus*, 5 *A. hybridus* from Central America, 4 *A. hybridus* from South America, 21 *A. hypochondriacus*. 24 *A. quitensis*. The resequencing data was obtained from Stetter et.a, 2020. Furthermore, 1 individual was used as the outgroup, *A. tuberculatus*. The fastq file was obtained from Kreiner et al., 2019 and later aligned with the amaranth reference genome (Lightfoot et.al 2017) using bwa-mem.
 
-Full list of samples available [here](https://docs.google.com/spreadsheets/d/1c-KKXu28MmEhc_AtrKWpN_J8-6mtg-mLBQvmc0PgugE/edit?usp=sharing)
 
 
 ## Variant Calling
@@ -39,7 +38,7 @@ Full list of samples available [here](https://docs.google.com/spreadsheets/d/1c-
 
 For calling variants, ANGSD v.0921 (Korilussen et. al 2014) was used.
 
-- **b** -> file with the paths for the bam files in use (preferentialy use the outgroup as last) ```list_bam_files_geneflow_tuberculatus.txt```
+- **b** -> file with the paths for the bam files in use (preferentially use the outgroup as last) ```list_bam_files_geneflow_tuberculatus.txt```
 - **out** -> output file prefix name
 - **ref** -> file with the fast file for the reference  genome (used A. hypochondriacus from Lightfoot et. al 2017)
 - **doCounts 1** -> count the number of A,C,G,T. All sites, All samples — necessary for filtering 
@@ -102,8 +101,10 @@ out=$phasedVCF
 
 ### Subsample and filtering
 
-If a subsampling of the VCF is necessary, it can
-
+If a subsampling of the VCF is necessary, it can be done with: (requires a list of tha desired samples. Name smust matach with the ones on the header of the VCF. This can be obtained wusing `bcftools qury -l $VCF_FILE`)
+```bash
+bcftools view -Oz -S data/raw/samples_introgression_109 data/raw/variant_calls/all_pop.vcf.gz --force-samples -m2  > data/processed/bcf_susbet_force_109.vcf.gz
+```
 
 ## Global gene flow
 
@@ -235,7 +236,39 @@ Dsuite Dinvestigate $VCF_FILE  sets.txt  test_trios.txt -w 10000,1
 
 ### Topology and twisst
 
-For topoly inference:
+For topology inference:
+
+**Requirements:**
+- VCF file
+- [genomics_general](https://github.com/simonhmartin/genomics_general)
+- [twisst](https://github.com/simonhmartin/twisst)
+- [ete3](http://etetoolkit.org/download/)
+- numpy 
+
+`PYTHON_PATH` must point to the genomics_general folder
+
+**Steps:**
+- preparation of VCF file to be accepted by simon_martin VCF parser:
+
+`twisst_01_vcf_prep.sh`
+
+```bash
+source /home/jgoncal1/.bashrc
+module load miniconda/py38_4.9.2
+conda activate ete3
+
+export PYTHONPATH=$PYTHONPATH:/projects/jgoncal1/tools/bin/genomics_general/
+
+echo "Preparing vcf for being using in S.Martin pipleine"
+
+VCF_FILE="../data/processed/vcf_files/filtered_full_genome.vcf.gz"
+OUTPUT_FILTERED_FILE="../data/processed/vcf_files/filtered_full_genome.vcf.gz"
+
+bcftools filter --set-GTs . $VCF_FILE -O u | bcftools view -U -i 'TYPE=="snp" & MAC >= 2' -O z > $OUTPUT_FILTERED_FILE
+
+#requites a tabix file
+```
+
 
 
 
