@@ -15,4 +15,4 @@ module load miniconda/py38_4.9.2
 conda activate base_jgd
 module load gnu/7.4.0
 
-Dsuite Dinvestigate -w 100,1 -n Dsuite_Dinvestigate_w100_fullgenome_crops_trios ../data/processed/vcf_files/ready_dovcf_geneflowsamples_all_chr.vcf.gz file_lists/list_amaranth_geneflow_samples_populations.txt file_lists/hybca_cru_hyp.txt
+Dsuite Dinvestigate -w 100,100 -n Dsuite_Dinvestigate_w100_step_100_fullgenome_crops_trios ../data/processed/vcf_files/ready_dovcf_geneflowsamples_all_chr.vcf.gz file_lists/list_amaranth_geneflow_samples_populations.txt file_lists/trios_crops.txt

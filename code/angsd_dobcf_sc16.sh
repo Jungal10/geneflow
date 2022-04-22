@@ -1,30 +1,29 @@
 #!/bin/bash -l
-#SBATCH --cpus-per-task=1
-#SBATCH --partition=smp 
+#SBATCH --cpus-per-task=3
+#SBATCH --partition=smp-rh7
 #SBATCH --mail-type=ALL
-#SBATCH --time=84:00:00
-#SBATCH --mem=300gb
+#SBATCH --time=48:00:00
+#SBATCH --mem=252gb
 #SBATCH --account=UniKoeln
 #SBATCH --mail-user=jgoncal1@uni-koeln.de
 #SBATCH --mail-type=ALL
-#SBATCH --error /scratch/jgoncal1/logs/errors/angsd_dobcf_sc16_dp150_%j
-#SBATCH -o /scratch/jgoncal1/logs/angsd_dobcf_sc16_dp150_%j
+#SBATCH --error /scratch/jgoncal1/logs/errors/dobcf_geneflow_ancient_samples_sc_16%j
+#SBATCH -o /scratch/jgoncal1/logs/dobcf_geneflow_ancient_samples_sc_16%j
 #SBATCH -D /projects/ag-stetter/jdias/projects/geneflow/code/
-#SBATCH --job-name="angsd_dobcf_sc16"
+#SBATCH --job-name="dobcf_geneflow_ancient_samples_sc_16"
 
 
 source /home/jgoncal1/.bashrc
 module load miniconda/py38_4.9.2
 conda activate angsd_new
 
-INPUT_BAM='file_lists/list_bam_files_geneflow_tuberculatus.txt'
-OUTPUT_FILE='../data/processed/angsd_dobcf_sc16_indp150_mindepth73'
-
-
+INPUT_BAM='file_lists/list_amaranth_geneflow_ancient_samples_tuberculatus_bam_files.txt'
+OUTPUT_FILE='../data/processed/dobcf_geneflow_ancient_samples_sc_16'
 
 angsd -b $INPUT_BAM \
 -out $OUTPUT_FILE \
 -ref ../data/raw/genomes/Ahypochondriacus_459_v2.0.fa \
+-P 3 \
 -r Scaffold_16: \
 -doCounts 1 \
 -doGeno 3 \
@@ -40,6 +39,5 @@ angsd -b $INPUT_BAM \
 -only_proper_pairs 1 \
 -trim 0  \
 -SNP_pval 1e-6 \
--C 50 \
 -setMaxDepthInd 150 \
 -setMinDepth 73 

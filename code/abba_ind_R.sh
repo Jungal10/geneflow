@@ -21,8 +21,8 @@ conda activate angsd_env
 # module load gnu/7.4.0
 
 IND_NAMES="file_lists/samples_geneflow.txt"
-ABABABABA_FILE="../data/processed/angsd_abbabaaba_out/abbababa_ind_sc16_minmaf002.Angsd.abbababa"
-OUTPUT_FILE="../data/processed/ind_R_abba_c16_maf002_"
+ABABABABA_FILE="../data/processed/abbababa_ind_full_genome_minmaf002.Angsd.abbababa"
+OUTPUT_FILE="../data/processed/ind_R_abbababa_ind_full_genome_minmaf002"
 
 
 Rscript ~/angsd/R/jackKnife.R file=$ABABABABA_FILE indNames=$IND_NAMES outfile=$OUTPUT_FILE

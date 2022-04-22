@@ -7,6 +7,7 @@ output: html_notebook
 
 packages loading
 
+
 ```{r, eval= FALSE, echo=FALSE}
 library(cowplot)
 library(ggplot2)
@@ -17,10 +18,9 @@ ind.abba.cols<- c("caudatus"="#a6cee3", "cruentus"="#1f78b4", "hypochondriacus"=
 
 
 nice_layout<-   
-  #   panel_border(color = "#ffffff", size = 1, linetype = 1,
-  # remove = TRUE, "black") +
-  theme(strip.background = element_rect(fill = "#ffffff"), text = element_text(size = 30))
-
+    panel_border(color = "#ffffff", size = 1, linetype = 1,
+  remove = TRUE, "black") +
+  theme(strip.background = element_rect(fill = "#ffffff"), text = element_text(size = 22))
 
 
 ```
@@ -29,97 +29,197 @@ nice_layout<-
 getwd()
 
 # crops_tree<- fread("../data/processed/dsuite_out/cruentus_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w50_sc16_50_1.txt") %>%
-  crops_tree<- fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/Dsuite_out/cruentus_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w100_fullgenome_crops_trios_100_1.txt") 
-    # filter(chr=="Scaffold_16") %>%
-  # filter(D>0) %>%
-  # filter(f_d>0) %>%
-  # filter(f_dM>0) %>%
-    mutate(window_center=(windowStart+windowEnd/2))
+  crops_tree<- fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/dsuite_nonoverlpaping/cruentus_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w100_step_100_fullgenome_crops_trios_100_100.txt") 
 
-# crops_tree_switched<-fread("../data/processed/dsuite_out/hypochondriacus_cruentus_caudatus_localFstats_Dsuite_Dinvestigate_w100_fullgenome_crops_trios_100_1.txt") %>%
-    crops_tree_switched<- fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/Dsuite_out/hybridus_CA_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w100_fullgenome_crops_trios_100_1.txt") %>%
-    filter(chr=="Scaffold_16") %>%
-  # filter(D>0) %>%
-  # filter(f_d>0) %>%
-  # filter(f_dM>0) %>%
-    mutate(window_center=(windowStart+windowEnd/2))
 
-# 
-# 
-# crops_tree_w1000<-fread("../data/processed/dsuite_out/cruentus_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w1000_sc16_extended_trios_1000_100.txt") %>%
-#   filter(D>0) %>%
-#   filter(f_d>0) %>%
-#   filter(f_dM>0) %>%
-#     mutate(window_center=(windowStart+windowEnd/2))
-# 
-# crops_tree_switched_w1000<-fread("../data/processed/dsuite_out/hypochondriacus_cruentus_caudatus_localFstats_Dsuite_Dinvestigate_w1000_sc16_extended_trios_1000_100.txt") %>%
-#   filter(D>0) %>%
-#   filter(f_d>0) %>%
-#   filter(f_dM>0) %>%
-#     mutate(window_center=(windowStart+windowEnd/2))
-# 
-# 
-# hyb_cru_cau_tree<-fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/Dsuite_out/hybridus_CA_cruentus_caudatus_localFstats_Dsuite_Dinvestigate_w100_fullgenome_crops_trios_100_1.txt")
-#     filter(D>=0) %>%
-#   filter(f_d>=0) %>%
-#   filter(f_dM>=0) %>%
-#     mutate(window_center=(windowStart+windowEnd/2))
-# 
-# 
-# hyb_hyp_cau_tree<-fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/Dsuite_out/hybridus_CA_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w100_fullgenome_crops_trios_100_1.txt") 
-#     filter(D>0) %>%
-#   filter(f_d>0) %>%
-#   filter(f_dM>0) %>%
-#     mutate(window_center=(windowStart+windowEnd/2))
+crops_tree<- crops_tree %>%
+    filter(str_detect(chr, "Scaffold")) %>%
+        mutate(window_center=round(((windowStart+windowEnd)/2))) %>%
+              mutate(Position = window_center/1e6) %>%
+    mutate(difference=windowEnd-windowStart) 
+
+  
+for_corr_evaluation<- crops_tree %>%
+  select(chr,window_center,D, f_d, f_dM) 
+for_corr_evaluation$f_d[!is.finite(for_corr_evaluation$f_d)] <- NA
+  
+correlacao<-  for_corr_evaluation %>%
+  select(-chr) %>%
+  cor(.,use ="complete.obs")
+
+  get_upper_tri <- function(cormat){
+    cormat[lower.tri(cormat)]<- NA
+    return(cormat)
+  }
+
+uptr_correlacato<-get_upper_tri(correlacao)
+  
+melted_cor<-melt(uptr_correlacato, na.rm = TRUE) 
+  
+    melted_cor$value<-round(melted_cor$value,2)
+    ggsave("../data/processed/figures/cor_cru_hyp_cau.png",
+
+  melted_cor %>%
+ggplot(., aes(Var2, Var1, fill = value))+
+ geom_tile(color = "white")+
+ scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+   midpoint = 0, limit = c(-1,1), space = "Lab", 
+   name="Pearson\nCorrelation") +
+  theme_minimal()+ 
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+    size = 12, hjust = 1))+
+ coord_fixed() +
+  theme(axis.title = element_blank()) +
+    nice_layout +
+  geom_text(aes(Var2, Var1, label = value), color = "black", size = 4) +
+theme(
+  legend.key.size = unit(4, 'cm'),
+  legend.text = element_text(size=12),
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.border = element_blank(),
+  panel.background = element_blank(),
+  axis.ticks = element_blank(),
+  legend.justification = c(1, 0),
+  legend.position = c(0.3, 0.7),
+  legend.direction = "horizontal")+
+  guides(fill = guide_colorbar(barwidth = 7, barheight = 1,
+                title.position = "top", title.hjust = 0.5))
+
+)
+
+
+```
+
+# PIR summary
+```{r}
+
+windows_full<- crops_tree %>%
+  filter(str_detect(chr, "Scaffold")) %>%
+ filter(f_dM<quantile(crops_tree$f_dM, .005) | f_dM>quantile(crops_tree$f_dM, .995)) %>%
+  group_by(chr) %>%
+  summarise(covered_bp=sum(difference)) %>%
+    separate(chr, into = c("id", "no"), remove = F, convert = T) %>%
+    arrange(id, no) %>%
+    select(-id, -no)
+
+
+
+
+
+ggsave("../data/processed/figures/fd_distribution_hyb_SA_hyp_cru.png",
+ crops_tree %>%
+     filter(str_detect(chr, "Scaffold")) %>%
+ filter(f_dM<quantile(crops_tree$f_dM, .005) | f_dM>quantile(crops_tree$f_dM, .995)) %>%
+  mutate(difference=windowEnd-windowStart) %>%
+             mutate(Position = windowStart/1e6) %>%
+  ggplot(aes(y=difference, x=Position)) +
+   geom_line() +
+  facet_wrap(.~chr, scales ="free") +
+   theme_bw() +
+   nice_layout +
+         theme(axis.text.x = element_text(angle = 45 ,size =22)) 
+   , width=28,height =28)
+
+  
+  
+windows_full
+
+chr_sizes<- fread("../data/processed/chr_sizes_list_Scaffolds.txt") %>%
+  rename(chr=V1, chr_size=V2)
+
+summary_windows<- windows_full %>%
+  inner_join(chr_sizes) %>%
+  mutate(introgressed_genome=as.numeric(covered_bp)/as.numeric(chr_size))
+
+
+ggsave("../data/processed/figures/fd_coverage_by_chr_hyb_SA_hyp_cru.png",
+ggplot(summary_windows, aes(x=chr, y=covered_bp), alpha(0.3)) +
+        geom_bar(stat="identity", aes(fill=introgressed_genome)) +
+    geom_col(aes(x=chr, y=chr_size),  alpha=0.3, stat="identity") +
+    theme_bw() +
+      theme(axis.text.x = element_text(angle = 45 ,size =22)) +
+        theme(axis.text.y = element_text(size =24)) +
+  theme(axis.title = element_text(size=22)) +
+     theme(legend.position = "none")  +
+      geom_text(aes(label=sprintf(introgressed_genome, fmt = '%#.3f', size=24), vjust=0)) 
+, width=18,height =12)
+  nice_layout
+
+
+
+fwrite(summary_windows, "../data/processed/geneflow_summary/coveredbp_geneflow_hyb_SA_hyp_cru.txt", quote=F, sep="\t")
+fwrite(crops_tree, "../data/processed/geneflow_summary/dsuite_stats_geneflow_hyb_SA_hyp_cru.txt", quote=F, sep="\t")
+
+ggsave("../data/processed/figures/fdm_ddistribution_normal_hyb_SA_hyp_cru.png",
+crops_tree %>%
+   filter(str_detect(chr, "Scaffold")) %>%
+  ggplot(aes(x=f_dM)) +
+  geom_histogram(aes(y = ..density..)) +
+  stat_function(fun = dnorm,
+                args = list(mean = mean(crops_tree$f_dM),
+                            sd = sd(crops_tree$f_dM)),
+                col = "red",
+                size = 1, linetype="dashed") +
+          theme(axis.text.x = element_text(angle = 45 ,size =22)) +
+  facet_wrap(.~chr) +
+  theme_bw() +
+  nice_layout , 
+width=28,height =28)
+  
+options(scipen=999)
 
 
 ```
 
 
 
-
-
-
 ```{r}
 
-top_windowss_crops_tree <-  crops_tree %>%
-                 filter(f_dM>quantile(crops_tree$f_dM, .99)) 
-
-top_windowss_crops_tree %>%
-  filter(chr=="Scaffold_16")
-
-top_windowss_crops_tree
+top_windows_crops_tree <-  crops_tree %>%
+    filter(str_detect(chr, "Scaffold")) %>%
+                 filter(f_dM>quantile(crops_tree$f_dM, .995)) %>%
+            mutate(Position = window_center/1e6)
 
 
-crops_tree   %>%
-filter(chr=="Scaffold_16") %>%
-  summarise(max(windowEnd))
+bottom_windows_crops_tree <-  crops_tree %>%
+    filter(str_detect(chr, "Scaffold")) %>%
+                 filter(f_dM<quantile(crops_tree$f_dM, .005)) %>%
+            mutate(Position = window_center/1e6)
 
 
-top_window_crop_tree<- crops_tree %>% 
-               filter(f_dM>quantile(crops_tree$f_dM, .99)) %>%
+ggsave("../data/processed/figures/fd_summary_hyb_SA_hyp_cru_all_chr.png",
+ggplot() +
+geom_point(data=crops_tree, aes(x=Position, y=f_dM),color = "#808080", alpha=0.1)  +
+  geom_point(data=top_windows_crops_tree, 
+             aes(x=Position,y=f_dM), 
+             color='#b2df8a',
+             size=3) +
+  geom_line(data=crops_tree, aes(x=Position, y=quantile(crops_tree$f_dM, .995)), color="#b2df8a",  linetype="dashed") +
+    geom_point(data=bottom_windows_crops_tree, aes(x=Position, y=f_dM),color = "#808080", alpha=0.3)  +
+  geom_point(data=bottom_windows_crops_tree, 
+             aes(x=Position,y=f_dM), 
+             color='#1f78b4',
+             size=3) +
+  geom_line(data=crops_tree, aes(x=Position, y=quantile(crops_tree$f_dM, .005)), color="#1f78b4",  linetype="dashed") +
+  facet_wrap(.~chr, scales="free") +
+      theme_bw() +
+      theme(axis.text.x = element_text(angle = 45 ,size =22)) +
+        theme(axis.text.y = element_text(size =24)) +
+  theme(axis.title = element_text(size=22)) +
+  nice_layout +
+     theme(legend.position = "none"),
+width=28,height =28)
 
-             # filter(f_dM>quantile(crops_tree$f_dM, .99) | f_dM<quantile(crops_tree$f_dM, .01)) %>%
-          mutate(Position = windowEnd/1e6)
 
 
-
-top_window_crop_tree_switched<- crops_tree_switched %>% 
-               filter(f_dM>quantile(crops_tree_switched$f_dM, .99)) %>%
-             # filter(f_dM>quantile(crops_tree_switched$f_dM, .99) | f_dM<quantile(crops_tree_switched$f_dM, .01)) %>%
-          mutate(Position = windowEnd/1e6)
+```
 
 
+zoom in QTL 16
 
-crops_tree<- crops_tree %>%
-  filter(f_dM >0) %>%
-    mutate(Position = windowEnd/1e6)
-
-crops_tree_switched <- crops_tree_switched %>%
-    filter(f_dM >0) %>%
-        mutate(Position = windowEnd/1e6)
-
-
+```{r}
 
 plot_fdm<-  
   ggplot() +
@@ -148,11 +248,8 @@ geom_point(data=crops_tree, aes(x=Position, y=f_dM),color = "#808080", alpha=0.1
 plot_fdm
 
 ggsave("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/fdm_hyp_cru_cau__cru_hyp_cau_sc16_vline.png", plot_fdm, width = 12, height =6)
-
 ```
 
-
-zoom in QTL 16
 
 
 ```{r}

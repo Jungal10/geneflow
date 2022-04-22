@@ -6,18 +6,18 @@
 #SBATCH --mem=168gb
 #SBATCH --account=UniKoeln
 #SBATCH --mail-user=jgoncal1@uni-koeln.de
-#SBATCH --error /scratch/jgoncal1/logs/errors/dovcf_geneflowsamples_full_genome_%j
-#SBATCH -o /scratch/jgoncal1/logs/dovcf_geneflowsamples_full_genome_%j
+#SBATCH --error /scratch/jgoncal1/logs/errors/dovcf_geneflow_ancient_samples_full_genome_%j
+#SBATCH -o /scratch/jgoncal1/logs/dovcf_geneflow_ancient_samples_full_genome_%j
 #SBATCH -D /projects/ag-stetter/jdias/projects/geneflow/code/
-#SBATCH --job-name="dovcf_geneflowsamples_full_genome_"
+#SBATCH --job-name="dovcf_geneflow_ancient_samples_full_genome_"
 
 
 source /home/jgoncal1/.bashrc
 module load miniconda/py38_4.9.2
 conda activate angsd_env
 
-INPUT_BAM='file_lists/list_bam_files_geneflow_tuberculatus.txt'
-OUTPUT_FILE='../data/processed/dovcf_geneflowsamples_full_genome'
+INPUT_BAM='file_lists/list_amaranth_geneflow_ancient_samples_tuberculatus_bam_files.txt'
+OUTPUT_FILE='../data/processed/dovcf_geneflow_ancient_samples_full_genome'
 
 
 angsd -b $INPUT_BAM \
