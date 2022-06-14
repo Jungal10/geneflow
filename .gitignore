@@ -3,7 +3,7 @@
 data/
 
 # tryouts 
-sandbox/
+#sandbox/
 
 # Mac files
 .DS_Store
@@ -20,6 +20,7 @@ sandbox/
 
 # Example code in package build process
 *-Ex.R
+
 
 # Output files from R CMD build
 /*.tar.gz
@@ -47,6 +48,9 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# R html 
+*.nb.html
 
 .DS_Store
 lib-cov

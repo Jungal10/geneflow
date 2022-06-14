@@ -1,0 +1,159 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(data.table)
+library(cowplot)
+nice_layout<-   theme_cowplot(font_size = 22)+
+    panel_border(color = "grey85", size = 1, linetype = 1,
+  remove = FALSE, "black") +
+    theme(strip.background = element_rect(fill = "#ffffff"), text = element_text(size = 22))
+```
+
+```{r}
+samples<-fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/code/file_lists/ids_all_outrgroups.txt", header = F) %>%
+  rename(X1=V1)
+population_ids<-fread("/Users/josedias/Downloads/amaranth_list_update - Sheet4.csv") %>%
+  rename(X1=new_name)
+
+pca <- read_table2("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/plink_pca_ancient_nofilters_original_header_maf01.eigenvec", col_names = FALSE) %>%
+  dplyr::rename(sample_name=X2)
+eigenval <- scan("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/plink_pca_ancient_nofilters_original_header_maf01.eigenval")
+
+populations_with_ids<-fread("/Users/josedias/Downloads/amaranth_list_update - Sheet6-2.tsv")
+
+
+ggplot(pca, aes(x=X3, y=X4)) +
+  geom_point()
+
+pca_w_samples<- pca %>%
+  inner_join(populations_with_ids, by="sample_name")
+
+ggsave("/Users/josedias/Desktop/pc1_2_alloutgroups_ancient_samples.png")
+pca_w_samples %>%
+ggplot(aes(x=X4, y=X5, color =Population, label=sample_name)) +
+  geom_point(aes(size =3)) +
+  # geom_text(hjust=0, vjust=0) +
+  xlab(paste0("PC 1, variance: ", eigenval[1])) +
+  ylab(paste0("PC 2, variance: ", eigenval[2])) +
+  theme_bw() +
+  nice_layout +
+geom_text(data = subset(pca_w_samples, Population == "ancient"))
+height = 10, width = 14)
+
+ggsave("/Users/josedias/Desktop/pc2_3_alloutgroups_ancient_samples.png",
+pca_w_samples %>%
+ggplot(aes(x=X4, y=X5, color =Population, label=X1)) +
+  geom_point() +
+  # geom_text(hjust=0, vjust=0) +
+  xlab(paste0("PC 2, variance: ", eigenval[2])) +
+  ylab(paste0("PC 3, variance: ", eigenval[3])) +
+  theme_bw()  +
+  nice_layout,
+height = 10, width = 14)
+# geom_text(data = subset(pca_w_samples, V3 == "caudatus" | V3 == "quitensis"))
+
+
+ggsave("/Users/josedias/Desktop/pc1_3_alloutgroups_ancient_samples.png",
+pca_w_samples %>%
+ggplot(aes(x=X3, y=X5, color =Population, label=X1)) +
+  geom_point() +
+  # geom_text(hjust=0, vjust=0) +
+  xlab(paste0("PC 1, variance: ", eigenval[1])) +
+  ylab(paste0("PC 3, variance: ", eigenval[3])) +
+  theme_bw()  +
+  nice_layout,
+height = 10, width = 14)
+# geom_text(data = subset(pca_w_samples, V3 == "caudatus" | V3 == "quitensis"))
+
+
+
+
+  
+  
+  
+```
+
+
+
+
+```{r}
+pve <- data.frame(PC = 1:20, pve = eigenval/sum(eigenval)*100)
+ggplot(pve, aes(PC, pve)) + geom_bar(stat = "identity") +
+   ylab("Percentage variance explained") + theme_light()
+```
+
+
+
+
+```{r}
+
+getwd()
+source('/Users/josedias/mount/projects/jgoncal1/tools/bin/twisst/plot_twisst.R')
+
+
+#weights file with a column for each topology
+weights_file <- "../data/processed/twisst/trees_output_scaffold9"
+
+weights_file<-"../data/processed/twisst/remake_output_Sc9_full_genome.phmyl.w100.data.tsv"
+
+
+
+
+
+# It is not necessary to import window data files, but if you do there should be one for
+# each weights file
+
+#coordinates file for each window
+window_data_file <- "../data/processed/twisst/remake_output_Sc9_full_genome.phmyl.w100.data.tsv"
+
+
+
+################################# import data ##################################
+
+# The function import.twisst reads the weights, window data  files into a list object
+# If there are multiple weights files, or a single file with different chromosomes/scaffolds/contigs
+# in the window data file, these will be separated when importing.
+
+twisst_data <- import.twisst(weights_files=weights_file,
+                             window_data_files=window_data_file)
+
+
+############################## combined plots ##################################
+# there are a functions available to plot both the weightings and the topologies
+
+#a summary plot shows all the topologies and a bar plot of their relative weightings
+window_data_file <- "../data/processed/twisst_output/output_sc16_withoutgroup.weights_cropswithoutinput.csv.gz"
+weights_file <- "../data/processed/twisst_output/output_sc16_withoutgroup.weights_cropswithoutinput.csv.gz"
+
+
+
+ plot.twisst.summary(twisst_data, lwd=3, cex=2, ) 
+  # nice_layout +
+
+    # theme(text = element_text(size = 30))
+       dev.off()
+
+
+ plot.twisst.summary.boxplot(twisst_data) 
+
+ getwd()
+  
+
+#or plot ALL the data across the chromosome(s)
+#Note, this is not recommended if there are large numbers of windows.
+# instead, it is recommended to first smooth the weghtings and plot the smoothed values
+plot.twisst(twisst_data, mode=3, show_topos=TRUE, include_region_names = TRUE)
+
+
+# make smooth weightings and plot those across chromosomes
+twisst_data_smooth <- smooth.twisst(twisst_data, span_bp = 20000, spacing = 1000)
+plot.twisst(twisst_data_smooth, mode=3) #mode 2 overlays polygons, mode 3 would stack them
+
+```

@@ -1,8 +1,7 @@
 #!/bin/bash -l
 #SBATCH --cpus-per-task=1
-#SBATCH --partition=smp-rh7 
-#SBATCH --mail-type=ALL
-#SBATCH --time=2:00:00
+#SBATCH --partition=devel-rh7 
+#SBATCH --time=1:00:00
 #SBATCH --mem=42gb
 #SBATCH --account=UniKoeln
 #SBATCH --mail-user=jgoncal1@uni-koeln.de
@@ -18,12 +17,12 @@ module load miniconda/py38_4.9.2
 conda activate base_jgd
 
 
-VCF_FILE="../data/processed/phased_dovcf_geneflow_ancient_samples_full_genome.vcf.gz.vcf.gz"
+VCF_FILE="../data/processed/dobcf_geneflow_ancient_samples_sc_16.vcf.gz"
 
 plink --vcf $VCF_FILE \
 --double-id \
 --allow-extra-chr \
 --make-bed \
 --pca \
---maf 0.1 \
---out ../data/processed/plink_pca_ancient_nofilters_original_header_maf01
+--maf 0.07 \
+--out ../data/processed/plink_pca_ancient_nofilters_sc16_maf007

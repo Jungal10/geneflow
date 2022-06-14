@@ -1,0 +1,408 @@
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#packages loading
+``` {r, echo=FALSE, results = FALSE}
+# library(reticulate)
+library(tidyverse)
+library(ggplot2)
+library(cowplot)
+library(data.table)
+library(igraph)
+# library("XML")
+library(xml2)
+library(plyr)
+library(dplyr)
+# install.packages('ggbeeswarm')
+# install.packages("extrafont") # see https://github.com/wch/extrafont/
+library(extrafont)
+require(extrafont)
+    # need only do this once!
+font_import(pattern="[A/a]rial", prompt=FALSE)
+library(ggbeeswarm)
+
+nice_layout<-   theme_cowplot(font_size = 22)+
+    panel_border(color = "grey85", size = 1, linetype = 1,
+  remove = FALSE, "black") 
+
+
+my_cols <- c('#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a')
+```
+
+
+# density plots
+
+```{r}
+
+
+# copyprobsfile<-"../data/processed/cp2_scaffold16_withf.linked.hap1.copyprobsperlocus.out.gz"
+copyprobsfile<-"/Users/josedias/Documents/PhD/projects/GeneFlow/data/processed/cp2_scaffold16_withf.linked.hap1.copyprobsperlocus.out.gz"
+
+myhap<-getHap("1 cru1",copyprobsfile,verbose=TRUE) # read in first haplotpe (it takes a minute or two)
+myhap2<-getHap(2,copyprobsfile,nlines=length(myhap$snps),verbose=TRUE) # second haplotype (takes half the time as provided with SNP count)
+simplecollist<-MakeColorYRP(0.1) # construct a list of colours
+cpdensityplot(myhap$snps[1:1000],myhap$probs[1:1000,],simplecollist) # plot the first 1000 SNPs
+###########
+
+
+
+```
+
+
+```{r}
+
+
+copyprobsfile.100k<-"/Users/josedias/Documents/PhD/projects/GeneFlow/data/processed/cp2_scaffold16_withf.linked.hap1.copyprobsperlocus.out.100k.gz"
+
+myhap.100k<-getHap("1 cru1",copyprobsfile.100k,verbose=TRUE) 
+myhap2.100k<-getHap("2 cru1",copyprobsfile.100k,nlines=length(myhap.100k$snps),verbose=TRUE) 
+simplecollist<-MakeColorYRP(0.1) # construct a list of colours
+nomes_pop<- c("caudatus", "cruentus", "hypochondriacus", "hybridus", "quitensis")
+
+
+collist2<-c(MakeColorYRP(0.2),rgb(0.3,0.3,0.3)) # contstruct a list of colours the correct length
+collist2<-collist2[c(1,4,7,10,13,16,2,5,8,11,14,17,3,6,9,12,15)] # reorder for higher contrast
+
+
+cpdensityplot(myhap.10k$snps[1:100000],myhap.100k$probs[1:100000,],simplecollist) # plot the first 100,000 SNPs
+
+png(file = "/Users/josedias/Documents/PhD/projects/GeneFlow/data/processed/figures/cruentus_individual_cpdensityplot_function.png")
+
+cpdensityplot(myhap.10k$snps,myhap.10k$probs[,],collist2) # plot the first 100,000 SNPs
+# legend("bottom",legend=nomes_pop, col=collist2[1:5])
+
+legend("bottomright",legend=nomes_pop,col=collist2[1:6],lty=1,lwd=2,bty="n")
+
+dev.off()
+
+
+###########
+# Now we will use the finestructure run to cluster the individuals
+
+```
+
+
+# plot haplotypes
+```{r}
+listagem=list()
+column_names<-c("pos", "caudatus", "cruentus", "hypochondriacus", "hybridus", "quitensis")
+# especies<- c("cau", "cru", "hyp", "hyb", "qui")
+# especies<- c( "caudatus", "cruentus", "hypochondriacus", "hybridus", "quitensis")
+
+
+for (chromosome in 1:16){
+for (species in especies){
+for (i in 1:9) {
+
+    dados <-fread(paste0("/Users/josedias/hap_data//haplotypes_full_cp2_withf_9each_scaffold_",chromosome,species,i)) 
+    dados = dados[-1,]
+    colnames(dados) <-column_names #subsitute first row for calcualted columns
+    dados.transformed<- dados %>%
+      dplyr::mutate(ancestor=case_when(
+  cruentus > 0.8 ~ "cruentus",
+    hypochondriacus > 0.8 ~ "hypochondriacus",
+      caudatus > 0.8 ~ "caudatus",
+    hybridus > 0.8 ~ "hybridus",
+    quitensis > 0.8 ~ "quitensis",
+  TRUE   ~ "ambiguous" # when proability is over 4/5 (0.8) 
+)) %>%
+  dplyr::group_by(ancestor) %>%
+  dplyr::summarise(contagem= n() /nrow(.)) 
+                dados.transformed$origin <-paste0(species)  #track of species of origin 
+       dados.transformed$file <-paste0(species,i)  #track of species of origin and iteration number 
+              dados.transformed$chr <-paste0(chromosome)  #track of species of origin and iteration number 
+
+      listagem<- rbind(listagem,dados.transformed)                   # Append new dataframe
+
+}
+}
+}
+
+listagem %>%
+
+  ggplot(aes(x=chr, y=contagem )) +
+      ylim(0,1) +
+  geom_boxplot() +
+        geom_jitter(size=0.4, alpha=0.9) +
+      # geom_jitter(size=2, alpha=0.9, aes(color=as.factor(file))) + #only use when looking to single species
+  # facet_wrap(chr~., scales = "free") +
+  facet_grid(ancestor~origin, scales = "free") +
+  nice_layout +
+  ggtitle("45 samples, 9 each pop") 
+      # geom_violin()
+
+
+
+listagem %>%
+  ggplot(aes(x=ancestor, y=contagem )) +
+  geom_boxplot() +
+    ylim(0,1) +
+        # geom_jitter(size=0.4, alpha=0.9) +
+      # geom_jitter(size=2, alpha=0.9, aes(color=as.factor(file))) + #only use when looking to single species
+  # facet_wrap(chr~., scales = "free") +
+  facet_grid(~origin, scales = "free") +
+  nice_layout +
+  ggtitle("45 samples, 9 each pop") +
+    theme(axis.text.x = element_text(angle = 90))
+      # geom_violin()
+
+
+
+comparison_by_chr<-listagem %>%
+  ggplot(aes(x=ancestor, y=contagem ))  +  geom_quasirandom(grouponX=FALSE) +
+      ylim(0,1) +
+  facet_grid(origin~reorder(chr, sort(as.numeric(chr)), scales = "free")) +
+nice_layout +
+      stat_summary(geom = "crossbar", color = "red", 
+                 fun = mean, fun.min = mean, fun.max = mean,
+                 fatten = 2.5, width = 0.5) +
+    theme(axis.text.x = element_text(angle = 90))
+
+ggsave(comparison_by_chr, filename="../data/processed/figures/cp_comparisons_by_chr.pdf", width = 20, height =10)
+
+
+```
+
+## stacked barplot
+
+```{r}
+
+lista=list()
+column_names<-c("pos", "caudatus", "cruentus", "hypochondriacus", "hybridus", "quitensis")
+especies<- c("cau", "cru", "hyp", "hyb", "qui")
+especies<- c("hyb")
+
+for (chromosome in 9:9){
+for (species in especies){
+for (i in 1:9) {
+  # if(is.null(dat)){
+  #   next
+  #   }
+    # ... make some data
+  name_file <-paste0("/Users/josedias/Downloads/hap_data//haplotypes_full_cp2_withf_introgression108_scaffold_",chromosome,species,i)
+    if(file.exists(name_file))
+      dat<-fread(name_file)
+    dat = dat[-1,]
+    colnames(dat) <-column_names #subsitute first row for calcualted columns
+    dat.transformed<- dat %>%
+      dplyr::mutate(ancestor=case_when(
+  cruentus > 0.5 ~ "cruentus",
+    hypochondriacus > 0.5 ~ "hypochondriacus",
+      caudatus > 0.5 ~ "caudatus",
+    hybridus > 0.5 ~ "hybridus",
+    quitensis > 0.5 ~ "quitensis",
+  TRUE   ~ "ambiguous" # when proability is over 4/5 (0.8)
+)) 
+        dat.transformed$origin <-paste0(species)  #track of species of origin 
+        dat.transformed$file <-paste0(species,i)  #track of species of origin and iteration number 
+       dat.transformed$chr <-paste0(chromosome)  #track of species of origin and iteration number 
+
+      lista<- rbind(lista,dat.transformed)   
+      # Append new dataframe
+}
+}
+}
+
+14,260,388-14,855,666 
+lista %>%
+             filter(pos<=14855666 )  %>%
+         filter(pos>= 14260388) %>%
+  group_by(ancestor) %>%
+  # nrow()
+  dplyr::summarise(n()/323541)
+
+
+
+for (species in especies){   nam <- paste( species,  "plot_per_site_sc9", sep = "_")
+assign(nam, lista  %>%
+      filter(origin==species) %>%
+    group_by(pos) %>%
+   dplyr::summarise(count(ancestor)) %>%
+     mutate(proportion=freq/9) %>%
+                filter(pos<=14355666)  %>%
+         filter(pos>= 14260388) %>%
+          ggplot(., aes(x = as.factor(pos), y = proportion, fill = x)) + 
+     ggtitle(paste0(species," 108 samples, QTL 14260388-14855666 sc9")) +
+        geom_bar( stat='identity') +
+  nice_layout +
+          theme(axis.text.x = element_text(angle = 90)) +
+  theme(axis.title = element_blank()) +
+              theme(axis.text.x = element_blank()) +
+    xlab("Position")
+)
+}
+
+hyb_plot_per_site_sc3
+
+ggsave(cru_plot_per_site_sc9, filename="../data/processed/figures/introgression_108_cru_QTL_sc9.png", width = 14, height=5)
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## sandbox 
+
+
+
+
+```{r}
+
+
+for (species in especies){   nam <- paste( species,  "prepare_plot_per_site_sc9", sep = "_")
+assign(nam, lista  %>%
+      filter(origin==species) %>%
+    group_by(pos) %>%
+   dplyr::summarise(count(ancestor)) %>%
+     mutate(proportion=freq/9) %>%
+                filter(pos<=14855666)  %>%
+         filter(pos>= 14260388))}
+
+
+cau_prepare_plot_per_site_sc9 %>%
+  ggplot(., aes(x = as.factor(pos), y = proportion, fill = x)) + 
+     ggtitle(paste0(species," 108 samples, QTL 14260388-14855666 sc9")) +
+        geom_line() +
+  nice_layout +
+          theme(axis.text.x = element_text(angle = 90)) +
+  theme(axis.title = element_blank()) +
+              theme(axis.text.x = element_blank()) +
+    xlab("Position")
+
+
+lista %>%
+                  filter(pos<=14855666)  %>%
+         filter(pos>= 14260388) %>%
+ggplot(., aes(x=pos)) + 
+  geom_line(aes(y=caudatus, col="caudatus")) +
+  geom_line(aes(y=cruentus, col="cruentus")) +
+  geom_line(aes(y=hypochondriacus, col="hypochondriacus")) +
+  geom_line(aes(y=hybridus, col="hybridus")) +
+  geom_line(aes(y=quitensis, col="quitensis")) +
+
+
+
+```
+
+
+```{r}
+lista=list()
+column_names<-c("pos", "caudatus", "cruentus", "hypochondriacus", "hybridus", "quitensis")
+# especies<- c("cau", "cru", "hyp", "hyb", "qui")
+especies<-"cau"
+
+for (species in especies){
+for (i in 1:33) {
+    # ... make some data
+    dat <-fread(paste0("/Users/josedias/Downloads/hap_data/haplotypes_full_cp2_withf_introgression108_scaffold_3",species,i)) 
+    dat = dat[-1,]
+    colnames(dat) <-column_names #subsitute first row for calcualted columns
+    dat.transformed<- dat %>%
+      dplyr::mutate(ancestor=case_when(
+  cruentus > 0.8 ~ "cruentus",
+    hypochondriacus > 0.8 ~ "hypochondriacus",
+      caudatus > 0.8 ~ "caudatus",
+    hybridus > 0.8 ~ "hybridus",
+    quitensis > 0.8 ~ "quitensis",
+  TRUE   ~ "ambiguous" # when proability is over 4/5 (0.8)
+)) 
+        dat.transformed$origin <-paste0(species)  #track of species of origin 
+        dat.transformed$file <-paste0(species,i)  #track of species of origin and iteration number 
+      lista<- rbind(lista,dat.transformed)                   # Append new dataframe
+}
+}
+
+    contagem_per_position<- lista  %>%
+    group_by(pos) %>%
+   dplyr::summarise(count(ancestor)) 
+    
+    
+    contagem_per_position %>%
+      mutate(proportion=freq/33) %>%
+            filter(pos<=5966304) %>%
+      filter(pos>=5881516)  %>%
+          ggplot(., aes(x = as.factor(pos), y = proportion, fill = x)) + 
+        geom_bar( stat='identity') 
+    
+
+          
+    
+    # 
+    # nice_layout +
+    #   scale_fill_manual(values=my_cols) 
+  
+```
+
+```{r}
+    contagem_per_position %>%
+      mutate(proportion=freq/9) %>%
+            filter(pos<=16684) %>%
+      filter(pos>=16656)   %>%
+ggplot(., aes(x=factor(pos), fill=factor(freq))) +
+  geom_bar(position="fill", width=0.7) 
+
+
+lista %>%
+            filter(pos<=16684) %>%
+      filter(pos>=16656)  
+
+```
+
+
+  dplyr::group_by(ancestor) %>%
+  dplyr::summarise(contagem= n() /nrow(.)) 
+                dat.transformed$origin <-paste0(species)  #track of species of origin 
+        dat.transformed$file <-paste0(species,i)  #track of species of origin and iteration number 
+      lista<- rbind(lista,dat.transformed)                   # Append new dataframe
+
+
+
+
+
+
+```{r}
+
+ data<- dat %>%
+      mutate(ancestor=case_when(
+  cruentus > 0.8 ~ "cruentus",
+    hypochondriacus > 0.8 ~ "hypochondriacus",
+      caudatus > 0.8 ~ "caudatus",
+    hybridus > 0.8 ~ "hybridus",
+    quitensis > 0.8 ~ "quitensis",
+  TRUE   ~ "ambiguous"
+)) %>%
+  group_by(ancestor) %>%
+  summarise(contagem= n() /nrow(.)) 
+    dat$i <- i  # maybe you want to keep track of which iteration produced it?
+    datalist[[i]] <- dat # add it to your list
+    
+    
+    data <- data.frame(x1 = 1:5,                      # Create example data
+                   x2 = 6:10,
+                   x3 = 11:15)
+data    
+    
+    for(iii in 1:3) {                                   # Head of for-loop
+  # new <- rep(i, nrow(data))                       # Create new column
+  data[ , ncol(data) + 1] <- species   
+
+  # Append new column
+  colnames(data)[ncol(data)] <- paste0("new", iii)  # Rename column name
+}
+```

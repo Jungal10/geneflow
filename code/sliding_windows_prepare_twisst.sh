@@ -13,7 +13,7 @@
 
 
 
-source /home/jgoncal1/.bashrc
+source /home/jgoncal1/.bashr
 module load miniconda/py38_4.9.2
 conda activate base_jgd 
 
