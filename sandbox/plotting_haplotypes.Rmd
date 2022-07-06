@@ -76,7 +76,6 @@ for (i in 3:3) { #cicles per file == number of pop
 }
 
 
-
 ```
 
 # plot boxplot
@@ -150,12 +149,12 @@ lista=list()
 column_names<-c("pos", "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
 # especies<- c("cau", "cru", "hyp", "hyb", "qui")
 # especies<- c( "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
-especies<-"quitensis"
-subsample_chr_list<-(c(9:9)) #ubsample due to exhausted vector
+especies<-"cruentus"
+subsample_chr_list<-(c(3:3)) #ubsample due to exhausted vector
 
 for (chromosome in subsample_chr_list){
 for (species in especies){
-for (i in 1:24) {
+for (i in 5:5) {
   name_file <-paste0("/Volumes/T7/hap_data/sc",chromosome,"_haplotypes_",species,i)
     if(file.exists(name_file)) {
       dat<-fread(name_file)
@@ -369,22 +368,44 @@ height =10, width =28 )
 
 ```{r}
 
+# ggsave("../data/processed/figures/hypochondriacus_21_proportionsummary_chromosome_sc9.png",
+       ggsave("/Users/josedias/Desktop/cruentus_5_proportionsummary_chromosome_sc3.png",
+
   lista %>%
-    filter(pos<100000) %>%
-            mutate(Position = pos/1e6) %>%
+    # filter(pos<100000) %>%
+            mutate(Position = pos/1e3) %>%
     select(-donor, -recipient, -file, -chr, -pos) %>%
          group_by(Position) %>%
-    melt(, id.vars=c("Position"))  %>%
-  arrange(Position)
-  # summarise(n_distinct(variable))
-      ggplot(.,aes(x=factor(Position), y=value, fill=variable)) +
+    melt(, id.vars=c("Position"))  %>% 
+# summarise(n_distinct(variable))
+      ggplot(.,aes(x=as.factor(Position), y=value, fill=variable)) +
     #         ggplot(., aes(x = as.factor(Position), y = proportion, fill = x)) + 
-          geom_bar( stat='identity',  width=1)  +
+  geom_bar(stat='identity', width = 1, na.rm = T) +
+          # geom_bar( stat='identity',  width=1)  +
     # ylim(0,1) +
-    # ggtitle("caudatus3 PI490612 sc9") +
+    ggtitle("hypochondriacus 643058 sc3") +
+  ylab("proportion") +
       nice_layout +
           scale_color_manual(values = stackbarcolors) +
-  theme(legend.position = "bottom", axis.title.x =element_blank(), axis.text.x = element_blank())
+            scale_fill_manual(values = stackbarcolors) +
+  theme(legend.position = "bottom", axis.text.x = element_blank()) +
+    xlab("Position") ,
+height = 8, width =18)
+
+    scale_x_discrete(breaks = c("4000", "8000", "12000","16000", "21000")) 
+  scale_x_discrete(name="position", expand = waiver(), guide = waiver())
+
+everyother <- function(x) x[seq_along(as.numeric(x)) %% 100000 == 0]
+
+  
+    # scale_x_discrete(breaks = levels(Position)[c(T, rep(F, 9))])
+
+  scale_x_discrete(breaks=c("5","10","15","20"))
+  
+  max(lista$pos)
+
+  # axis.title.x =element_blank(), axis.text.x = element_blank())
+
 # 
 ```
 
@@ -481,43 +502,46 @@ lista %>%
   theme(legend.position = "bottom")
 # height = 4, width =15)
 
-  
+  # ggsave("../data/processed/figures/hypocondriacus_21_smooth_chromosome_sc9.png",
+  ggsave("/Users/josedias/Desktop/cruentus_5_smooth_chromosome_sc3.png",
+
 lista %>%
   # filter(chr==13) %>%
-  filter(pos<1000000) %>%
+  # filter(pos<1000000) %>%
   ggplot() +
   # geom_line() +
-  geom_smooth( aes(x = as.numeric(pos), y=caudatus, color="caudatus")) +
+  geom_smooth( aes(x = as.numeric(pos), y=quitensis, color="quitensis")) +
     # geom_point(aes(x = pos, y=caudatus, color="caudatus"), size=1) +
     geom_smooth(aes(x = pos, y=cruentus, color="cruentus")) +
     # geom_point(aes(x = pos, y=cruentus, color="cruentus"), size=1) +
-      geom_smooth(aes(x = pos, y=hypochondriacus, color="hypochondriacus")) +
+      geom_smooth(aes(x = pos, y=caudatus, color="caudatus")) +
     # geom_point(aes(x = pos, y=hypochondriacus, color="hypochondriacus"), size=1) +
         geom_smooth(aes(x = pos, y=hybridus_CA, color="hybridus_CA")) +
     # geom_point(aes(x = pos, y=hybridus_CA, color="hybridus_CA"), size=1) +
         geom_smooth(aes(x = pos, y=hybridus_SA, color="hybridus_SA")) +
     # geom_point(aes(x = pos, y=hybridus_SA, color="hybridus_SA"), size=1) +
-
   nice_layout +
           scale_color_manual(values = stackbarcolors) +  
-  theme(legend.position = "bottom")  
-
-
+  theme(legend.position = "bottom") ,
+height = 8, width =18)
 
 
 lista %>%
   # filter(chr==13) %>%
-  filter(pos<100000) 
+  filter(pos<100000) %>%
+melt(, id.vars=c("recipient","donor", "pos", "file")) %>%
+rename(proportion=value) %>%
+  filter(pos==94515)
+
+# nrow()
   # nrow()
 # nrow()
-  
-mutate(proportion=freq/29664) %>%
-  mutate(donor=x)  %>%
-    group_by(recipient) %>%
-  dplyr::summarise(count(donor))  
+# mutate(proportion=as.numeric(freq)/29664) 
+    group_by(pos) %>%
+  dplyr::summarise(count(donor))
 
   # ggplot() +
-             ggplot(., aes(x = as.factor(Position), y = proportion, fill = donor)) + 
+             ggplot(., aes(x = as.factor(pos), y = proportion, fill = donor)) + 
      ggtitle(paste0(species, " recipient scaffold_9")) +
         geom_bar( stat='identity',  width=1) +
   # # geom_line() +
@@ -533,7 +557,7 @@ mutate(proportion=freq/29664) %>%
   #   # geom_point(aes(x = pos, y=hybridus_SA, color="hybridus_SA"), size=1) +
 
   nice_layout +
-          scale_color_manual(values = stackbarcolors) +  
+          scale_fill_manual(values = stackbarcolors) +  
   theme(legend.position = "bottom")  
 
 
