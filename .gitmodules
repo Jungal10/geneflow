@@ -1,0 +1,6 @@
+[submodule "text/text"]
+	path = text/text
+	url = https://github.com/Jungal10/geneflow.git
+[submodule "text/geneflow_manuscript"]
+	path = text/geneflow_manuscript
+	url = https://github.com/Jungal10/amaranth_introgression.git
