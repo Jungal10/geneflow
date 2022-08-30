@@ -22,7 +22,7 @@ library(reshape2)
 
 ### deafult changes for calean background and bigger text size
 
-nice_layout<-   theme_cowplot(font_size = 22)+
+nice_layout<-   theme_cowplot(font_size = 22) +
     panel_border(color = "grey85", size = 1, linetype = 1,
   remove = FALSE, "black") +
     theme(strip.background = element_rect(fill = "#ffffff"), text = element_text(size = 22))
@@ -43,9 +43,9 @@ stackbarcolors<- c("ambiguous"="#808080", "caudatus"="#a6cee3", "cruentus"="#1f7
 classfication_summary=list()  # creates a empty list that will be appended as the funtion is applied
 column_names<-c("pos", "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
 especies<- c( "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
-especies<-"caudatus"
+# especies<-"caudatus"
 
-for (chromosome in 16:16){  #cycles through each chromossome
+for (chromosome in 3:3){  #cycles through each chromossome
 for (species in especies){ #cycles per spcecies
 for (i in 3:3) { #cicles per file == number of pop
       # ... make some data
@@ -102,11 +102,11 @@ plot_side_by_side_boxplot<- extneded_classfication_summary %>%
   theme(strip.text.x = element_blank()) +
   theme(axis.text.x=element_text(size=18)) +
 theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
-  labs(title = "Proportion distribution per population (chr 16)")
+  labs(title = "Proportion distribution per population (chr 3)")
 
 plot_side_by_side_boxplot
 # 
-# ggsave( "../data/processed/figures/plot_side_by_side_boxplot_sc16.pdf", plot_side_by_side_boxplot, device="pdf", width = 12, height =8)
+# ggsave( "../data/processed/figures/plot_side_by_side_boxplot_sc3.pdf", plot_side_by_side_boxplot, device="pdf", width = 12, height =8)
 
 ```
 
@@ -120,12 +120,12 @@ classification_along=list()
 column_names<-c("pos", "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
 # especies<- c("cau", "cru", "hyp", "hyb", "qui")
 # especies<- c( "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
-especies<-"cruentus"
-subsample_chr_list<-(c(3:3)) #ubsample due to exhausted vector
+especies<-"caudatus"
+subsample_chr_list<-(c(2:2)) #ubsample due to exhausted vector
 
 for (chromosome in subsample_chr_list){
 for (species in especies){
-for (i in 5:5) {
+for (i in 27:27) {
   name_file <-paste0("/Volumes/T7/hap_data/sc",chromosome,"_haplotypes_",species,i)
     if(file.exists(name_file)) {
       dat<-fread(name_file)
@@ -158,45 +158,125 @@ options(scipen=999)
 
 ```
 
+## save_tables
+```{r}
+# create table
+fwrite(classification_along, "../data/processed/caudatus_27_490518_sc9", sep="\t", quote=F)
+
+#table with not self
+
+classification_along %>% 
+  filter(donor!=especies) %>% 
+  fwrite("/Users/josedias/mount/scratch/jgoncal1/data/processed/table_without_self_caudaatus_37_PI490518_sc9.txt", sep="\t", quote=F) 
+
+```
+
+
 
 ## plot haplotypes along the genome (individuals files)
 ### Stackbar plots
 
 ```{r}
-ggsave("../data/processed/figures/caudatus_3_along_the genome_chromosome_9.png",
-listagem%>%
-  ggplot(.,aes(x=donor, y=contagem, fill=donor)) +
-  geom_bar(stat="identity") +
-   facet_grid(.~chr, scales="free") +
-  nice_layout +
-      theme(axis.text.x = element_blank(),
-            axis.ticks = element_blank()) +
-        scale_fill_manual(values = stackbarcolors) +
-        scale_color_manual(values = stackbarcolors) +  
-  ggtitle("caudatus3 PI490612 "), 
+
+classification_along_withotut_self <-
+  classification_along %>%
+  filter(donor!=recipient)
+
+ggsave("/Users/josedias/Documents/PhD/projects/GeneFlow/text/amaranth_introgression/figures/caudatus_27_along_the genome_chromosome_2.png",
+classification_along %>%
+  # filter(pos<100000) %>%
+   mutate(Position = pos/1e3) %>%
+  
+    select(-donor, -recipient, -file, -chr, -pos) %>%
+         group_by(Position) %>%
+    melt(, id.vars=c("Position"))  %>% 
+      ggplot(.,aes(x=as.factor(Position), y=value, fill=variable)) +
+  geom_bar(stat='identity', width = 1, na.rm = T) +
+    ggtitle("A. caudatus PI 490518 sc2") +
+  ylab("Proportion") +
+  ylim(0,1) +
+      nice_layout +
+          scale_color_manual(values = stackbarcolors) +
+            scale_fill_manual(values = stackbarcolors) +
+  theme(legend.position = "none", axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
+    xlab("Position")
+,
 height = 8, width =18)
+# height = 8, width =18)
 ```
 
 ## lineplot (smooth without self)
 
 ```{r}
- ggsave("/Users/josedias/Desktop/cruentus_5_smooth_chromosome_sc3.png",
-
-lista %>%
+ggsave("../data/processed/figures/incompatibility/caudatus_27_smooth_chromosome_sc9.png",
+classification_along %>%
   # filter(pos<1000000) %>%
+      mutate(Position = pos/1e6) %>%
   ggplot() +
-  geom_smooth( aes(x = as.numeric(pos), y=quitensis, color="quitensis")) +
-    geom_smooth(aes(x = pos, y=cruentus, color="cruentus")) +
-      geom_smooth(aes(x = pos, y=caudatus, color="caudatus")) +
-        geom_smooth(aes(x = pos, y=hybridus_CA, color="hybridus_CA")) +
-        geom_smooth(aes(x = pos, y=hybridus_SA, color="hybridus_SA")) +
+  geom_smooth( aes(x = as.numeric(Position), y=quitensis, color="quitensis")) +
+    geom_smooth(aes(x = Position, y=cruentus, color="cruentus")) +
+      geom_smooth(aes(x = Position, y=hypochondriacus, color="hypochondriacus")) +
+        geom_smooth(aes(x = Position, y=hybridus_CA, color="hybridus_CA")) +
+        geom_smooth(aes(x = Position, y=hybridus_SA, color="hybridus_SA")) +
+  xlab("Position (Mb)") + 
+  ylab("Proportion") +
   nice_layout +
           scale_color_manual(values = stackbarcolors) +  
-  theme(legend.position = "bottom") ,
+  theme(legend.position = "bottom"),
 height = 8, width =18)
 
 ```
 
 
+call not self
+```{r}
 
+list_not_self=list()
+column_names<-c("pos", "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
+# especies<- c("cau", "cru", "hyp", "hyb", "qui")
+# especies<- c( "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
+especies<-"quitensis"
+subsample_chr_list<-(c(3,9,16)) #ubsample due to exhausted vector
+
+for (chromosome in subsample_chr_list){
+for (species in especies){
+for (i in 1:33) {
+  name_file <-paste0("/Volumes/T7/hap_data/sc",chromosome,"_haplotypes_",species,i)
+    if(file.exists(name_file)) {
+      dat<-fread(name_file)
+    dat = dat[-1,]
+    colnames(dat) <-column_names #subsitute first row for calcualted columns
+    dat.transformed<- dat %>%
+      dplyr::mutate(donor=case_when(
+  cruentus > 0.5 ~ "cruentus",
+    hypochondriacus > 0.5 ~ "hypochondriacus",
+      caudatus > 0.5 ~ "caudatus",
+      hybridus_CA > 0.5 ~ "hybridus_CA",
+    hybridus_SA > 0.5 ~ "hybridus_SA",
+    quitensis > 0.5 ~ "quitensis",
+  TRUE   ~ "ambiguous" # when proability is over 1/2 (0.5)
+)) 
+        dat.transformed$recipient <-paste0(species)  #track of species of recipient 
+        dat.transformed$file <-paste0(species,i)  #track of species of recipient and iteration number 
+       dat.transformed$chr <-paste0(chromosome)  #track of species of recipient and iteration number 
+       dat.transformed<-dat.transformed %>%
+      filter(donor!=recipient)
+      list_not_self<- rbind(list_not_self,dat.transformed)   
+      # Append new dataframe
+    }
+else {print(paste0("The file does not exist, so it was skipped", name_file))
+}
+  }
+}
+}
+
+options(scipen=999)
+
+
+
+```
+```{r}
+fwrite(list_not_self, "/Users/josedias/Desktop/list_not_self_quitensis_sc3_9_16.txt", sep="\t", quote=F)
+
+```
 

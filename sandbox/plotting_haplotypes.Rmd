@@ -19,7 +19,8 @@ library(dplyr)
 # install.packages("extrafont") # see https://github.com/wch/extrafont/
 # library(ggbeeswarm)
 
-
+install.packages("ggmap")
+library("ggmap")
 library(reshape2)
 
 nice_layout<-   theme_cowplot(font_size = 22)+
@@ -32,6 +33,8 @@ my_cols <- c('#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6
 
 
 stackbarcolors<- c("ambiguous"="#808080", "caudatus"="#a6cee3", "cruentus"="#1f78b4", "hypochondriacus"="#b2df8a", "hybridus_CA"="#33a02c", "hybridus_SA"="#f8bf68", "quitensis"="#fb9a99")
+
+clear_layout
 ```
 
 
@@ -42,11 +45,11 @@ listagem=list()  # creates a empty list that will be appended as the funtion is 
 column_names<-c("pos", "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
 # especies<- c("cau", "cru", "hyp", "hyb", "qui")
 # especies<- c( "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
-especies<-"caudatus"
+especies<-"quitensis"
 
-for (chromosome in 16:16){  #cycles through each chromossome
+for (chromosome in 3:3){  #cycles through each chromossome
 for (species in especies){ #cycles per spcecies
-for (i in 3:3) { #cicles per file == number of pop
+for (i in 1:24) { #cicles per file == number of pop
       # ... make some data
   name_file <-paste0("/Volumes/T7/hap_data/sc",chromosome,"_haplotypes_",species,i)
     if(file.exists(name_file)) # checks file existance without breaking code in case of missing 
@@ -150,11 +153,11 @@ column_names<-c("pos", "caudatus", "cruentus", "hypochondriacus", "hybridus_CA",
 # especies<- c("cau", "cru", "hyp", "hyb", "qui")
 # especies<- c( "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
 especies<-"cruentus"
-subsample_chr_list<-(c(3:3)) #ubsample due to exhausted vector
+subsample_chr_list<-(c(16:16)) #ubsample due to exhausted vector
 
 for (chromosome in subsample_chr_list){
 for (species in especies){
-for (i in 5:5) {
+for (i in 1:21) {
   name_file <-paste0("/Volumes/T7/hap_data/sc",chromosome,"_haplotypes_",species,i)
     if(file.exists(name_file)) {
       dat<-fread(name_file)
@@ -188,6 +191,7 @@ options(scipen=999)
 
 
 
+
 ```
 
 ## table for Akansahka, summary by donoe
@@ -196,18 +200,154 @@ options(scipen=999)
 
 # name_columns<- fread("/Users/josedias/Desktop/list_samples_names_transposed.txt", header=F)
 
-scaffold_16_lista<-lista %>%
+cruentus_lista_sc16<-lista %>%
     select(-caudatus,-cruentus,-hypochondriacus,-quitensis,-hybridus_CA, -hybridus_SA, -recipient ) %>%
   group_by(file) %>%
       tidyr::spread(key = file,value = donor) 
-colnames(scaffold_16_lista)<- name_columns
+# colnames(scaffold_16_lista)<- name_columns
 
-scaffold_8_lista %>%
-fwrite(., "../data/processed/AS_files/AS_list_sc8.txt", quote=FALSE, sep="\t")
+# 
+# 
+# scaffold_8_lista %>%
+# fwrite(., "../data/processed/AS_files/AS_list_sc16.txt", quote=FALSE, sep="\t")
+# 
+# lista %>%
+#   filter(recipient=="cruentus")
+# 
+# sub_scaffold_16_lista  <-
+#   scaffold_16_lista %>%
+#   head(n=300)
+# 
+
+cruentus_summary_sc16 <-
+cruentus_lista_sc16  %>%
+      # filter(pos <40000) %>%
+  rowwise() %>%
+  dplyr::mutate(count_caudatus = (sum(c_across(cruentus1:cruentus9) == "caudatus", na.rm=TRUE))/21,
+         count_cruentus = (sum(c_across(cruentus1:cruentus9) == "cruentus", na.rm=TRUE))/21,
+          count_hypochondriacus = (sum(c_across(cruentus1:cruentus9) == "hypochondriacus", na.rm=TRUE))/21,
+           count_hybridus_CA = (sum(c_across(cruentus1:cruentus9) == "hybridus_CA", na.rm=TRUE))/21,
+           count_hybridus_SA = (sum(c_across(cruentus1:cruentus9) == "hybridus_SA", na.rm=TRUE))/21,
+          count_quintensis = (sum(c_across(cruentus1:cruentus9) == "quitensis", na.rm=TRUE))/21,
+                   count_ambiguous = (sum(c_across(cruentus1:cruentus9) == "ambiguous", na.rm=TRUE))/21
+         ) %>%
+  ungroup() %>%
+        select(pos, chr, count_caudatus,count_cruentus,count_hypochondriacus,count_quintensis,count_hybridus_CA, count_hybridus_SA, count_ambiguous ) 
+
+# 
+# quitensis_summary_sc9 <-
+# quitensis_lista_sc9  %>%
+#       # filter(pos <40000) %>%
+#   rowwise() %>%
+#   dplyr::mutate(count_caudatus = (sum(c_across(quitensis1:quitensis17) == "caudatus", na.rm=TRUE))/24,
+#          count_cruentus = (sum(c_across(quitensis1:quitensis17) == "cruentus", na.rm=TRUE))/24,
+#           count_hypochondriacus = (sum(c_across(quitensis1:quitensis17) == "hypochondriacus", na.rm=TRUE))/24,
+#            count_hybridus_CA = (sum(c_across(quitensis1:quitensis17) == "hybridus_CA", na.rm=TRUE))/24,
+#            count_hybridus_SA = (sum(c_across(quitensis1:quitensis17) == "hybridus_SA", na.rm=TRUE))/24,
+#           count_quintensis = (sum(c_across(quitensis1:quitensis17) == "quitensis", na.rm=TRUE))/24,
+#                    count_ambiguous = (sum(c_across(quitensis1:quitensis17) == "ambiguous", na.rm=TRUE))/24
+#          ) %>%
+#   ungroup() %>%
+#         select(pos, chr, count_caudatus,count_cruentus,count_hypochondriacus,count_quintensis,count_hybridus_CA, count_hybridus_SA, count_ambiguous ) 
 
 
+fwrite(cruentus_summary_sc16, "/Users/josedias/Desktop/cruentus_summary_sc16.txt", sep="\t", quote=F)
 
 ```
+
+
+```{r}
+
+count_stackbarcolors<- c("count_ambiguous"="#808080", "count_caudatus"="#a6cee3", "count_cruentus"="#1f78b4", "count_hypochondriacus"="#b2df8a", "count_hybridus_CA"="#33a02c", "count_hybridus_SA"="#f8bf68", "count_quintensis"="#fb9a99")
+
+# quitensis_lista_sc9  %>%
+#       filter(pos <40000) %>%
+#   rowwise() %>%
+#   dplyr::mutate(count_caudatus = sum(c_across(cruentus1:cruentus9) == "caudatus", na.rm=TRUE),
+#          count_cruentus = sum(c_across(cruentus1:cruentus9) == "cruentus", na.rm=TRUE),
+#           count_hypochondriacus = sum(c_across(cruentus1:cruentus9) == "hypochondriacus", na.rm=TRUE),
+#            count_hybridus_CA = sum(c_across(cruentus1:cruentus9) == "hybridus_CA", na.rm=TRUE),
+#            count_hybridus_SA = sum(c_across(cruentus1:cruentus9) == "hybridus_SA", na.rm=TRUE),
+#           count_quintensis = sum(c_across(cruentus1:cruentus9) == "quitensis", na.rm=TRUE),
+#                    count_ambiguous = sum(c_across(cruentus1:cruentus9) == "ambiguous", na.rm=TRUE)
+#          ) %>%
+#   ungroup() %>%
+#         select(pos, chr, count_caudatus,count_cruentus,count_hypochondriacus,count_quintensis,count_hybridus_CA, count_hybridus_SA, count_ambiguous ) 
+
+
+
+
+
+plot_sc16_cruentus<- cruentus_summary_sc16 %>%
+    # filter(pos <40000) %>%
+         # group_by(pos) %>%
+    melt(, id.vars=c("pos", "chr"))   %>%
+  # filter(pos=="13284") 
+              ggplot(., aes(x = as.factor(pos), y = value, fill = variable)) + 
+     # ggtitle(paste0(species, " recipient scaffold_9")) +
+        geom_bar( stat='identity',  width=1) +
+  scale_fill_manual(values=count_stackbarcolors) +
+    scale_color_manual(values=count_stackbarcolors) +
+    # scale_x_discrete(name="position", expand = waiver(), guide = waiver()) +
+      scale_y_continuous(expand = c(0, 0)) +
+  ylim(0,1) + # expand=c(0,0)removes space between plot area and x axis  +
+         theme(                axis.ticks.x =element_blank(), axis.text.x = element_blank(), 
+                legend.position = "none") +
+ylab("Ancestry proportion") +
+  xlab("Position")
+
+
+
+
+  
+# 
+# ggplot() +
+#   geom_point(aes(x=pos, y=count_caudatus)) +
+#     geom_point(aes(x=pos, y=count_cruentus)) +
+#     geom_point(aes(x=pos, y=count_hypochondriacus)) +
+#     geom_point(aes(x=pos, y=count_hybridus_CA)) +
+#     geom_point(aes(x=pos, y=count_hybridus_SA)) +
+#     geom_point(aes(x=pos, y=count_quintensis)) +
+#   scale_fill_manual(values=count_stackbarcolors) +
+#     scale_color_manual(values=count_stackbarcolors) 
+
+ ggsave(filename="/Users/josedias/Desktop/summary_cruentus_sc16.png", plot_sc16_cruentus, width = 14, height=3, bg="white")
+
+```
+
+
+```{r}
+plot_smooth_quitensis<-
+  quitensis_summary_sc9 %>%
+    # filter(pos <40000) %>%
+  # filter(chr==13) %>%
+  # filter(pos<100000) %>%
+  ggplot() +
+  # geom_line() +z`z`
+  geom_smooth( aes(x = as.numeric(pos), y=count_quintensis, color="quitensis")) +
+        geom_smooth( aes(x = as.numeric(pos), y=count_ambiguous, color="ambiguous")) +
+    # geom_point(aes(x = pos, y=caudatus, color="caudatus"), size=1) +
+    geom_smooth(aes(x = pos, y=count_cruentus, color="cruentus")) +
+    # geom_point(aes(x = pos, y=cruentus, color="cruentus"), size=1) +
+      geom_smooth(aes(x = pos, y=count_caudatus, color="caudatus")) +
+    # geom_point(aes(x = pos, y=hypochondriacus, color="hypochondriacus"), size=1) +
+        geom_smooth(aes(x = pos, y=count_hybridus_CA, color="hybridus_CA")) +
+    # geom_point(aes(x = pos, y=hybridus_CA, color="hybridus_CA"), size=1) +
+        geom_smooth(aes(x = pos, y=count_hybridus_SA, color="hybridus_SA")) +
+    # geom_point(aes(x = pos, y=hybridus_SA, color="hybridus_SA"), size=1) +
+  # nice_layout +
+          scale_color_manual(values = stackbarcolors) +  
+          theme(                axis.ticks.x =element_blank(), axis.text.x = element_blank()) +
+  ylab("Ancestry proportion") +
+  xlab("Position") +
+  theme(legend.position = "bottom") 
+    # ,]
+
+ ggsave(filename="/Users/josedias/Desktop/smooth_summary_quitensis_sc9.png", plot_smooth_quitensis, width = 14, height=3, bg="white")
+
+```
+
+
 
 ```{r}
 
@@ -234,19 +374,20 @@ height =10, width =28 )
 create summaries of donors (per recipient)
 ```{r}
 species<-"hybridus_SA"
-subsample_chr_list<-(c(9:16)) #ubsample due to exhausted vector
+column_names<-c("pos", "caudatus", "cruentus", "hypochondriacus", "hybridus_CA", "hybridus_SA", "quitensis")
+subsample_chr_list<-(c(1:9)) #ubsample due to exhausted vector
 lista=list()
 sumario=list()
 donor= c("ambiguous", "caudatus", "cruentus", "hybridus_CA", "hybridus_SA", "hypochondriacus", "quitensis" )
 sumario<-as.data.frame(donor)
 dat.transformed=list()
-for (i in 1:5) {
+for (i in 1:4) {
   for (chromosome in subsample_chr_list){
   name_file <-paste0("/Volumes/T7/hap_data/sc",chromosome,"_haplotypes_",species,i)
     if(file.exists(name_file)) {
       dat<-fread(name_file)
     dat = dat[-1,]
-    colnames(dat) <-column_names #subsitute first row for calcualted columns
+    colnames(dat) <- column_names #subsitute first row for calcualted columns
     dat.transformed<- dat %>%
       dplyr::mutate(donor=case_when(
   cruentus > 0.5 ~ "cruentus",
@@ -345,31 +486,147 @@ ggplot() +
   guides(fill = FALSE) +
   theme_bw()
 
-ggsave("/Users/josedias/Desktop/sumarios/summary_donors+beeswarm.png",
+ggsave("/Users/josedias/Desktop/sumarios/summary_donors_boxplot_narrow.png",
 ggplot() +
-  # geom_boxplot(data = whole_sumario, aes(x=donor, y=value, fill=donor)) +
-   geom_beeswarm(data = whole_sumario, aes(x=donor, y=value, color=donor, cex=1.5)) +
-  geom_quasirandom(method = "pseudorandom") +
-  facet_wrap(recipient~.) +
-    facet_grid(.~recipient) +
+  geom_boxplot(data = whole_sumario, aes(x=recipient, y=value, fill=donor, color=donor)) +
+   # geom_beeswarm(data = whole_sumario, aes(x=recipient, y=value, color=donor, cex=0.5)) +
+  # geom_quasirandom(method = "pseudorandom") +
+  # facet_wrap(recipient~.) +
+    facet_grid(.~recipient, scales = "free") +
   theme_bw() +
   ylab("proportion") +
    # scale_fill_manual(values = stackbarcolors) +
         scale_color_manual(values = stackbarcolors) +  
-  nice_layout +
+          scale_fill_manual(values = stackbarcolors) +  
+  clear_layout +
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
           axis.title.x = element_blank(),
-          legend.box = "horizontal", legend.position = "none"),
-height =10, width =28 )
+          legend.box = "horizontal", legend.position = "none") +
+  theme(
+  strip.background = element_blank(),
+  strip.text.x = element_blank(), 
+   panel.spacing = unit(0.2,'lines')
+) +
+  guides(color = guide_legend(nrow = 1))
+,
+height =5, width =20, bg="white" )
+
+
+
+ggsave("/Users/josedias/Documents/PhD/projects/GeneFlow/text/amaranth_introgression/figures/summary_donors_quitensis_nohybridus.png",
+ggplot() +
+  geom_boxplot(data = sumario_qui_notself, aes(x=recipient, y=value, fill=donor, color=donor)) +
+   # geom_beeswarm(data = whole_sumario, aes(x=recipient, y=value, color=donor, cex=0.5)) +
+  # geom_quasirandom(method = "pseudorandom") +
+  # facet_wrap(recipient~.) +
+    # facet_grid(.~recipient, scales = "free") +
+  theme_bw() +
+  ylab("proportion") +
+   # scale_fill_manual(values = stackbarcolors) +
+        scale_color_manual(values = stackbarcolors) +  
+          scale_fill_manual(values = stackbarcolors) +  
+  clear_layout +
+    theme(axis.text.x = element_blank(),
+          axis.title.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          legend.box = "horizontal", legend.position = "none") +
+  theme(
+  strip.background = element_blank(),
+  strip.text.x = element_blank(), 
+   panel.spacing = unit(0.2,'lines')
+) ,
+height =5, width =10 )
+
+
+# ca.sa.countries <- c('Argentina', 'Bolivia', 'Brazil',  
+#                'Colombia', 'Chile','Ecuador','French Guiana','Guyana', 
+#                'Paraguay', 'Peru', 'Suriname', 
+#                'Trinidad and Tobago', 'Uruguay', 'Venezuela', 'Mexico', 'Guatemala')
+# 
+# countries.maps <- map_data("world", region = ca.sa.countries)
+# 
+# 
+# us <- c(left = -122.19, bottom = -59.87, right = -25.28, top = 32.72)
+# get_stamenmap(us, zoom = 5, maptype = "toner-lite") %>% ggmap(legend = "none") 
+
 
 ```
 
+
+## without_self
+
+
+```{r}
+
+
+sumario_cau_notself<- sumario_cau %>%
+  filter(donor !="caudatus") %>%
+    filter(donor !="hybridus_CA") %>%
+    filter(donor !="hybridus_SA") 
+
+
+sumario_cru_notself<- sumario_cru %>%
+  filter(donor !="cruentus") %>%
+    filter(donor !="hybridus_CA") %>%
+    filter(donor !="hybridus_SA")
+
+sumario_hyp_notself<- sumario_hyp %>%
+  filter(donor !="hypochondriacus") %>%
+    filter(donor !="hybridus_CA") %>%
+    filter(donor !="hybridus_SA")
+
+sumario_hybCA_notself<- sumario_hybca %>%
+  filter(donor !="hybridus_CA") %>%
+    filter(donor !="hybridus_CA") %>%
+    filter(donor !="hybridus_SA")
+
+sumario_hybSA_notself<- sumario_hybsa %>%
+  filter(donor !="hybridus_SA") %>%
+    filter(donor !="hybridus_CA") %>%
+    filter(donor !="hybridus_SA")
+
+sumario_qui_notself<- sumario_qui %>%
+  filter(donor !="quitensis") %>%
+    filter(donor !="hybridus_CA") %>%
+    filter(donor !="hybridus_SA")
+
+
+  whole_sumario_notself<- rbind(sumario_cau_notself,sumario_cru_notself,sumario_hyp_notself,sumario_hybCA_notself,sumario_hybSA_notself ,sumario_qui_notself)
+
+
+ggsave("/Users/josedias/Desktop/sumarios/summary_donors_notself_boxplot_narrow_w_legend.png",
+
+ggplot() +
+  geom_boxplot(data = whole_sumario_notself, aes(x=recipient, y=value, fill=donor, color=donor)) +
+   # geom_beeswarm(data = whole_sumario, aes(x=recipient, y=value, color=donor, cex=0.5)) +
+  # geom_quasirandom(method = "pseudorandom") +
+  # facet_wrap(recipient~.) +
+    facet_grid(.~recipient, scales = "free") +
+  theme_bw() +
+  ylab("proportion") +
+   # scale_fill_manual(values = stackbarcolors) +
+        scale_color_manual(values = stackbarcolors) +  
+          scale_fill_manual(values = stackbarcolors) +  
+  clear_layout +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          axis.title.x = element_blank(),
+          legend.box = "horizontal", legend.position = "bottom") +
+  theme(
+  strip.background = element_blank(),
+  strip.text.x = element_blank(), 
+   panel.spacing = unit(0.2,'lines')
+) +
+  guides(color = guide_legend(nrow = 1))
+,
+height =5, width =20, bg="white" )
+
+```
 
 
 ```{r}
 
 # ggsave("../data/processed/figures/hypochondriacus_21_proportionsummary_chromosome_sc9.png",
-       ggsave("/Users/josedias/Desktop/cruentus_5_proportionsummary_chromosome_sc3.png",
+       ggsave("/Users/josedias/Desktop/cruentus_5_proportionsummary_chromosome_sc16.png",
 
   lista %>%
     # filter(pos<100000) %>%
@@ -383,7 +640,7 @@ height =10, width =28 )
   geom_bar(stat='identity', width = 1, na.rm = T) +
           # geom_bar( stat='identity',  width=1)  +
     # ylim(0,1) +
-    ggtitle("hypochondriacus 643058 sc3") +
+    ggtitle("hypochondriacus 643058 sc16") +
   ylab("proportion") +
       nice_layout +
           scale_color_manual(values = stackbarcolors) +
@@ -503,7 +760,7 @@ lista %>%
 # height = 4, width =15)
 
   # ggsave("../data/processed/figures/hypocondriacus_21_smooth_chromosome_sc9.png",
-  ggsave("/Users/josedias/Desktop/cruentus_5_smooth_chromosome_sc3.png",
+  ggsave("/Users/josedias/Desktop/cruentus_5_smooth_chromosome_sc16.png",
 
 lista %>%
   # filter(chr==13) %>%
@@ -641,7 +898,7 @@ theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 especies<- c("hybridus_SA")
 
 for (species in especies){
-  nam <- paste( species,  "plot_per_site_sc3", sep = "_")
+  nam <- paste( species,  "plot_per_site_sc16", sep = "_")
 assign(nam, lista %>% 
   filter(recipient==especies) %>%
       # filter(pos<=14261388)  %>%
@@ -670,7 +927,7 @@ assign(nam, lista %>%
 
 ```{r}
 
-plot_to_save<- hybridus_SA_plot_per_site_sc3 %>%
+plot_to_save<- hybridus_SA_plot_per_site_sc16 %>%
          # filter(pos<=14261388)  %>%
          # filter(pos>= 14201388) %>%
             ggplot(., aes(x = as.factor(Position), y = proportion, fill = donor)) + 
@@ -734,7 +991,7 @@ plot_to_save_QTL16
 
 ```{r}
 
-line_plot_to_save<- hybridus_SA_plot_per_site_sc3 %>%
+line_plot_to_save<- hybridus_SA_plot_per_site_sc16 %>%
     ggplot(., aes(x =  Position, y = proportion, fill = donor, color=donor)) +
      ggtitle(paste0(species, " recipient scaffold_3")) +
         # geom_bar( stat='identity') +
@@ -769,7 +1026,7 @@ line_plot_to_save
 
 ```{r}
 
-line_plot_to_save_QTL3<- hybridus_SA_plot_per_site_sc3 %>%
+line_plot_to_save_QTL3<- hybridus_SA_plot_per_site_sc16 %>%
   filter(pos<5850000) %>%
   filter(pos>6000000) %>%
     mutate(Position_kb = pos/1e3) %>%
@@ -816,10 +1073,10 @@ scale_fill_manual(values = stackbarcolors) +
  # ggsave(filename="/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/tmp_caudatus_plot_per_site_QTL_highlighted_sc9.png",line_plot_to_save_QTL9, width = 14, height=3)
  
 
- ggsave(filename="/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/hybridus_SA_line_plot_per_site_sc3.png", line_plot_to_save, width = 14, height=3)
+ ggsave(filename="/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/hybridus_SA_line_plot_per_site_sc16.png", line_plot_to_save, width = 14, height=3)
  
 
- ggsave(filename="/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/hybridus_SA_line_plot_per_site_QTL_highlighted_sc3.png", line_plot_to_save_QTL3, width = 14, height=3)
+ ggsave(filename="/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/data/processed/figures/hybridus_SA_line_plot_per_site_QTL_highlighted_sc16.png", line_plot_to_save_QTL3, width = 14, height=3)
  
  
  

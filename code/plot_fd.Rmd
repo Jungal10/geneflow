@@ -36,6 +36,9 @@ addUnits <- function(n) {
   return(labels)
 }
 
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
 ```
 
 
@@ -125,19 +128,7 @@ crops_tree<- crops_tree %>%
 
 
 df.tmp <-
-crops_tree %>%
-   group_by(CHR) %>% 
-    summarise(chr_len=max(windowEnd)) %>%
-     mutate(tot=cumsum(chr_len)-chr_len) %>%
-    select(-chr_len) %>%
-    left_join(crops_tree, ., by=c("CHR")) %>%
-  arrange(chr, windowEnd) %>%
-    mutate( BPcum=windowEnd+tot) %>%
-  mutate( is_highlight=ifelse(f_dM>quantile(crops_tree$f_dM, .99), "yes", "no")) %>%
-    mutate( is_annotate=ifelse(f_dM>quantile(crops_tree$f_dM, .99), "yes", "no"))
-
-  axisdf <- df.tmp %>% group_by(CHR) %>% summarize(center=( max(BPcum) + min(BPcum) ) / 2 )
-  
+crops_tree 
   
   
   
@@ -188,6 +179,8 @@ melted_cor<-melt(uptr_correlacato, na.rm = TRUE)
     melted_cor$value<-round(melted_cor$value,2)
     ggsave("../data/processed/figures/cor_cru_hyp_cau.png",
 
+           
+           
   melted_cor %>%
 ggplot(., aes(Var2, Var1, fill = value))+
  geom_tile(color = "white")+
@@ -255,7 +248,7 @@ theme(
       theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=1, size=10), legend.position = "none", axis.title.x = element_blank()) 
   
     
-    
+    plot_fd_crops
 
   
 plot_sweep_caudatus<-     
@@ -448,66 +441,118 @@ devtools::install_github("PhanstielLab/bedtoolsr", force = T)
 options(bedtools.path = "/Users/josedias/miniconda3/bin/")
 
 
-all_sweeps<- full_join(sweeps_caudatus.df, sweeps_cruentus.df) %>%
-  full_join(sweeps_hypochondriacus.df)
+top_windows_crops_tree <-
+  df.tmp %>%
+filter(f_dM > quantile(df.tmp$f_dM, .995)) %>%
+  select(CHR, windowStart, windowEnd, f_dM, Position)
+  
 
-sweeps_cau_cru<- full_join(sweeps_caudatus.df, sweeps_cruentus.df) 
+bottom_windows_crops_tree <-
+    df.tmp %>%
+ filter(f_dM <  quantile(df.tmp$f_dM, .005)) %>%
+    select(CHR, windowStart, windowEnd, f_dM, Position)
 
-  sweeps_cau_hyp<- full_join(sweeps_caudatus.df, sweeps_hypochondriacus.df) 
+sweeps_caudatus.df <-
+sweeps_caudatus.df %>%
+  rename(windowStart=startpos,windowEnd=endpos ) %>%
+    select(CHR, windowStart, windowEnd)
 
-interesection_crops_tree_sweep_tops<- bedtoolsr::bt.intersect(top_windows_crops_tree, sweeps_cau_hyp) %>%
-  rename(chr=V1, windowStart=V2, windowEnd=V3, f_dM=V6) %>%
+ 
+
+interesection_crops_tree_sweep_tops<- bedtoolsr::bt.intersect(top_windows_crops_tree, sweeps_caudatus.df ) %>%
+  rename(CHR=V1, windowStart=V2, windowEnd=V3, f_dM=V4)  %>%
           mutate(window_center=round(((windowStart+windowEnd)/2))) %>%
               mutate(Position = window_center/1e6) 
   
 
-interesection_crops_tree_sweep_bottom<- bedtoolsr::bt.intersect(bottom_windows_crops_tree, sweeps_cau_cru) %>%
-  rename(chr=V1, windowStart=V2, windowEnd=V3, f_dM=V6) %>%
+interesection_crops_tree_sweep_bottom<- bedtoolsr::bt.intersect(bottom_windows_crops_tree, sweeps_caudatus.df) %>%
+  rename(CHR=V1, windowStart=V2, windowEnd=V3, f_dM=V4) %>%
           mutate(window_center=round(((windowStart+windowEnd)/2))) %>%
               mutate(Position = window_center/1e6) 
 
 interesection_crops_tree_sweeps_all<-rbind(interesection_crops_tree_sweep_bottom, interesection_crops_tree_sweep_tops)
   
   
-top_windows_crops_tree <-  crops_tree %>%
-    filter(str_detect(chr, "Scaffold")) %>%
-                 filter(f_dM>quantile(crops_tree$f_dM, .995)) %>%
-            mutate(Position = window_center/1e6)
-
-
-bottom_windows_crops_tree <-  crops_tree %>%
-    filter(str_detect(chr, "Scaffold")) %>%
-                 filter(f_dM<quantile(crops_tree$f_dM, .005)) %>%
-            mutate(Position = window_center/1e6)
-
+# top_windows_crops_tree <-  crops_tree %>%
+#     filter(str_detect(chr, "Scaffold")) %>%
+#                  filter(f_dM>quantile(crops_tree$f_dM, .995)) %>%
+#             mutate(Position = window_center/1e6)
+# 
+# 
+# bottom_windows_crops_tree <-  crops_tree %>%
+#     filter(str_detect(chr, "Scaffold")) %>%
+#                  filter(f_dM<quantile(crops_tree$f_dM, .005)) %>%
+#             mutate(Position = window_center/1e6)
+# 
 
 
 
        plot_fd_crops <-
     ggplot(df.tmp, aes(x=Position, y=f_dM)) +
     # Show all points
-    geom_point(aes(alpha=0.1), color="#808080",  size=0.5) +
+    geom_point(alpha=0.1, color="#dcdcdc",  size=0.5) +
             nice_layout +
          geom_point(data=top_windows_crops_tree, 
              aes(x=Position,y=f_dM), 
              color='#b2df8a',fill="#b2df8a",
              size=2) +
-  geom_line(data=df.tmp, aes(x=Position, y=quantile(crops_tree$f_dM, .995)), color="#b2df8a", fill="#b2df8a", linetype="dashed") +
+  geom_line(data=df.tmp, aes(x=Position, y=quantile(df.tmp$f_dM, .995)), color="#b2df8a", fill="#b2df8a", linetype="dashed") +
     geom_point(data=bottom_windows_crops_tree, aes(x=Position, y=f_dM),color = "#808080", alpha=0.3)  +
   geom_point(data=bottom_windows_crops_tree, 
              aes(x=Position,y=f_dM), 
              color='#1f78b4', fill="#1f78b4",
              size=2) +
-  geom_line(data=df.tmp, aes(x=Position, y=quantile(crops_tree$f_dM, .005)), color="#1f78b4", fill="#1f78b4",  linetype="dashed") +
+               facet_grid(.~CHR, scales = "free", space = "free_x") +
+  geom_line(data=df.tmp, aes(x=Position, y=quantile(df.tmp$f_dM, .005)), color="#1f78b4", fill="#1f78b4",  linetype="dashed")  +
          geom_point(data=interesection_crops_tree_sweeps_all, aes(x=Position, y=f_dM),
              size=2.5,  color="red") +
-      facet_grid(.~CHR, scales = "free", space = "free_x") +
               # scale_x_continuous( label = axisdf$CHR, breaks= axisdf$center ) +
     scale_y_continuous(expand = c(0, 0.1)) +  # expand=c(0,0)removes space between plot area and x axis  +
   scale_x_continuous(labels = addUnits) +
-      theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=1, size=10), legend.position = "none", axis.title.x = element_blank()) 
-  
+      theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=1, size=10), legend.position = "none", axis.title.x = element_blank()) +
+         clear_layout +
+           theme(guides(fill = guide_colorbar(barwidth = 7, barheight = 1,
+                title.position = "top", title.hjust = 0.5)))
+  plot_fd_crops
 
+  reds.w <- c("#FFAD7E", "#E9874F", "#D96726", "#AE4A12", "#873100") # method 1
+
+  
+      ggplot(df.tmp, aes(x=Position, y=f_dM)) +
+    # Show all points
+    geom_point(aes(color=as.factor(chr)), alpha=0.5,  size=0.5)+
+            # nice_layout +
+         geom_point(data=top_windows_crops_tree, 
+             aes(x=Position,y=f_dM), 
+             color='#b2df8a',fill="#b2df8a",
+             size=2) +
+  geom_line(data=df.tmp, aes(x=Position, y=quantile(df.tmp$f_dM, .995)), color="#b2df8a", fill="#b2df8a", linetype="dashed") +
+    geom_point(data=bottom_windows_crops_tree, aes(x=Position, y=f_dM),color = "#808080", alpha=0.3)  +
+  geom_point(data=bottom_windows_crops_tree, 
+             aes(x=Position,y=f_dM), 
+             color='#1f78b4', fill="#1f78b4",
+             size=2) +
+               facet_grid(.~CHR, scales = "free", space = "free_x") +
+  geom_line(data=df.tmp, aes(x=Position, y=quantile(df.tmp$f_dM, .005)), color="#1f78b4", fill="#1f78b4",  linetype="dashed")  +
+         geom_point(data=interesection_crops_tree_sweeps_all, aes(x=Position, y=f_dM),
+             size=2.5,  color="red") +
+              # scale_x_continuous( label = axisdf$CHR, breaks= axisdf$center ) +
+    scale_y_continuous(expand = c(0, 0.1)) +  # expand=c(0,0)removes space between plot area and x axis  +
+  scale_x_continuous(labels = addUnits, expand = c(0,0)) +
+         clear_layout +
+        theme(
+    panel.spacing = unit(0,'lines')
+  ) +
+              theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=1, size=10), legend.position = "none", axis.title.x = element_blank()) +
+        theme(legend.position = "none") +
+            scale_color_manual(values = rep(c("#dcdcdc", "#c0c0c0"), 16 ))
+            # scale_color_manual(values = rep(my_cols, 16 )) 
+     # ggplot() +       
+     # geom_linerange(aes(xmin=tot, xmax=endpos, y=sweep_height)) +
+ geom_point(sweeps_caudatus.df, aes(x=endpos, y=sweep_height), shape="|", color="#000000",  size=4) 
+
+      
+      
 
 ```
 
@@ -609,7 +654,7 @@ bottom_windows_crops_tree <-  crops_tree %>%
             mutate(Position = window_center/1e6)
 
 
-ggsave("../data/processed/figures/fd_summary_hyb_SA_hyp_cru_all_chr.png",
+# ggsave("../data/processed/figures/fd_summary_hyb_SA_hyp_cru_all_chr.png",
 ggplot() +
 geom_point(data=crops_tree, aes(x=Position, y=f_dM),color = "#808080", alpha=0.1)  +
   geom_point(data=top_windows_crops_tree, 
@@ -629,8 +674,9 @@ geom_point(data=crops_tree, aes(x=Position, y=f_dM),color = "#808080", alpha=0.1
         theme(axis.text.y = element_text(size =24)) +
   theme(axis.title = element_text(size=22)) +
   nice_layout +
-     theme(legend.position = "none"),
-width=28,height =28)
+     theme(legend.position = "none")
+# ,
+# width=28,height =28)
 
 
 

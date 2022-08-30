@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+library(plyr)
 library(ggplot2)
 library(admixr)
 library(tidyverse)
@@ -32,11 +33,11 @@ stackbarcolors<- c("ambiguous"="#808080", "caudatus"="#a6cee3", "cruentus"="#1f7
 
 ```{r}
 
-dados_30d<- fread("/Users/josedias/Downloads/incompatibility_study - documentation_post_transp_updat.tsv" )
+dados_30d<- fread("/Users/josedias/Downloads/incompatibility_study - documentation_post_transp_updat (1).tsv" )
 
 dados_30d %>%
   group_by(cross_type) %>%
-  dplyr::summarise(count(died)) %>%
+  dplyr::summarise(plyr::count(died)) %>%
   # melt(id.vars="cross_type") 
 mutate(died=x) %>%
 ggplot(., aes(x=as.factor(cross_type), y=freq, fill=died)) +
@@ -56,13 +57,13 @@ geom_bar(stat="identity") +
 
 dados_30d %>%
     # group_by(cross_type) %>%
-ggplot(., aes(x=as.factor(cross_type), y=as.numeric(`30d_growth`)), fill=cross_type) +
+ggplot(., aes(x=as.factor(cross_type), y=as.numeric(`growth_93d`)), fill=cross_type) +
 geom_beeswarm(aes(color=type)) +
 nice_layout
 
 dados_30d %>%
     melt(id.vars="cross_type") %>%
-  filter(grep("gowth"), variable)
+  filter(grep("growth"), variable)
 
 cor(cross_type,`30d_growth`)
 ```

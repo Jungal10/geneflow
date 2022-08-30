@@ -80,28 +80,35 @@ height = 10, width = 14)
   
 ```
 
-
-
-
 ```{r}
 pve <- data.frame(PC = 1:20, pve = eigenval/sum(eigenval)*100)
 ggplot(pve, aes(PC, pve)) + geom_bar(stat = "identity") +
    ylab("Percentage variance explained") + theme_light()
 ```
 
-
-
-
 ```{r}
 
 getwd()
-source('/Users/josedias/mount/projects/jgoncal1/tools/bin/twisst/plot_twisst.R')
+source('/Users/josedias/Desktop/plot_twisst.R')
+
+generate.PDF <- function(data) {    
+pdf("/Users/josedias/Desktop/draft_twisst_summary.pdf", width = 24, height = 9)
+plot_summary_twisst<- (plot.twisst.summary(twisst_data, lwd=3, cex=2)) 
+  dev.off()
+}
+
+generate.PDF()
+
+
+ggsave("/Users/josedias/Desktop/draft_twisst_summary.png", 
+plot =plot_summary_twisst ,  width = 10, height = 10)
+
 
 
 #weights file with a column for each topology
-weights_file <- "../data/processed/twisst/trees_output_scaffold9"
+weights_file <- "/Users/josedias/mount/scratch/jgoncal1/data/processed/twisst_output/trees_output_scaffold9"
 
-weights_file<-"../data/processed/twisst/remake_output_Sc9_full_genome.phmyl.w100.data.tsv"
+weights_file<-"/Users/josedias/mount/scratch/jgoncal1/data/processed/twisst_output/remake_output_Sc9_full_genome.phmyl.w100.data.tsv"
 
 
 
@@ -111,7 +118,7 @@ weights_file<-"../data/processed/twisst/remake_output_Sc9_full_genome.phmyl.w100
 # each weights file
 
 #coordinates file for each window
-window_data_file <- "../data/processed/twisst/remake_output_Sc9_full_genome.phmyl.w100.data.tsv"
+window_data_file <- "/Users/josedias/mount/scratch/jgoncal1/data/processed/twisst_output/remake_output_Sc9_full_genome.phmyl.w100.data.tsv"
 
 
 
@@ -129,12 +136,17 @@ twisst_data <- import.twisst(weights_files=weights_file,
 # there are a functions available to plot both the weightings and the topologies
 
 #a summary plot shows all the topologies and a bar plot of their relative weightings
-window_data_file <- "../data/processed/twisst_output/output_sc16_withoutgroup.weights_cropswithoutinput.csv.gz"
-weights_file <- "../data/processed/twisst_output/output_sc16_withoutgroup.weights_cropswithoutinput.csv.gz"
+window_data_file <- "/Users/josedias/mount/scratch/jgoncal1/data/processed/twisst_output/output_sc16_withoutgroup.weights_cropswithoutinput.csv.gz"
+weights_file <- "/Users/josedias/mount/scratch/jgoncal1/data/processed/twisst_output/output_sc16_withoutgroup.weights_cropswithoutinput.csv.gz"
 
 
 
- plot.twisst.summary(twisst_data, lwd=3, cex=2, ) 
+plot_summary_twisst<- (plot.twisst.summary(twisst_data, lwd=3, cex=2,)) 
+  
+
+
+ggsave("/Users/josedias/OneDrive/Stetter_Lab/GeneFlow/figures/manuscript/draft_twisst_summary.png", 
+plot_summary_twisst ,  width = 10, height = 10)
   # nice_layout +
 
     # theme(text = element_text(size = 30))
@@ -156,4 +168,8 @@ plot.twisst(twisst_data, mode=3, show_topos=TRUE, include_region_names = TRUE)
 twisst_data_smooth <- smooth.twisst(twisst_data, span_bp = 20000, spacing = 1000)
 plot.twisst(twisst_data_smooth, mode=3) #mode 2 overlays polygons, mode 3 would stack them
 
+
+source('/Users/josedias/Desktop/plot_twisst.R')
+plot_summary_twisst<- (plot.twisst.summary(twisst_data, lwd=4, cex=2)) 
+par(mar)
 ```
