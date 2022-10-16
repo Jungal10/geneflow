@@ -1,0 +1,162 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+
+# packages loading
+
+```{r, eval= FALSE, echo=FALSE}
+library(cowplot)
+library(ggplot2)
+library(data.table)
+library(tidyverse)
+library(dplyr)
+
+my_cols<- c("caudatus"="#a6cee3", "cruentus"="#1f78b4", "hypochondriacus"="#b2df8a", "hybridus_CA"="#33a02c","hybridus_SA"="#fdbf6f", "quitensis"="#fb9a99")
+nice_layout<-   
+  theme_cowplot(22) +
+    panel_border(color = "#ffffff", size = 1, linetype = 1,
+  remove = TRUE, "black") +
+  theme(strip.background = element_rect(fill = "#ffffff"), text = element_text(size = 22))
+
+options(scipen = 999)
+
+addUnits <- function(n) {
+  labels <- ifelse(n < 1000, n,  # less than thousands
+                   ifelse(n < 1e6, paste0(round(n/1e3)),  # in thousands
+                          ifelse(n < 1e9, paste0(round(n/1e6)),  # in millions
+                                 ifelse(n < 1e12, paste0(round(n/1e9)), # in billions
+                                        ifelse(n < 1e15, paste0(round(n/1e12)), # in trillions
+                                               'too big!'
+                                        )))))
+  return(labels)
+}
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+devtools::install_github("PhanstielLab/bedtoolsr", force = T)
+options(bedtools.path = "/Users/josedias/miniconda3/bin/")
+
+clear_layout<-   theme_cowplot(font_size = 22)+
+  #   panel_border(color = "grey85", size = 1, linetype = 1,
+  # remove = FALSE, "black") +
+    theme(strip.background = element_rect(fill = "#ffffff"), text = element_text(size = 22))
+
+```
+
+
+
+```{r}
+
+top_sweep_windows<- fread("/Users/josedias/Desktop/top_comvbined_windows_caudatus.txt") %>%
+  mutate(windowsize=
+           windowEnd-windowStart) 
+
+ sweeps_caudatus.df<- top_sweep_windows %>%
+             mutate(window_center=round(((windowStart+windowEnd)/2))) %>%
+  rename(CHR=chr)
+sweeps_caudatus.df$sweep_height<-as.numeric(-1.1) 
+
+crops_tree.data<- fread("/Users/josedias/mount/scratch/jgoncal1/data/processed/dsuite_nonoverlpaping/cruentus_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w100_step_100_fullgenome_crops_trios_100_100.txt")
+
+nrow(crops_tree.data)
+
+# crops_tree.data<- fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/code/cruentus_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w100_step_100_sc16_crops_only_devel__100_100.txt")
+
+
+
+# crops_tree.data<- fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/code/hybridus_CA_cruentus_caudatus_localFstats_rerun_Dsuite_Dinvestigate_w100_step_100_fullgenome_crops_trios_100_100.txt")
+
+
+
+
+# crops_tree.data<- fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects/geneflow/code/cruentus_hypochondriacus_caudatus_localFstats_Dsuite_Dinvestigate_w1000_1000step_1000_fullgenome_crops_only_1000_1000.txt")
+crops_tree<- crops_tree.data %>%
+    filter(str_detect(chr, "Scaffold")) %>%
+        mutate(window_center=round(((windowStart+windowEnd)/2))) %>%
+              mutate(Position = window_center/1e6) %>%
+    mutate(windowsize=windowEnd-
+             windowStart) %>%
+    mutate(CHR=gsub("Scaffold_","", chr)) %>%
+   mutate_at(c('CHR'), as.numeric) 
+
+top_windows_crops_tree <-  crops_tree %>%
+    filter(str_detect(chr, "Scaffold")) %>%
+                 filter(D>quantile(crops_tree$D, .995)) %>%
+            mutate(Position = window_center/1e6) %>%
+    select(CHR, windowStart, windowEnd, D, Position, window_center)
+
+
+
+bottom_windows_crops_tree <-  crops_tree %>%
+    filter(str_detect(chr, "Scaffold")) %>%
+                 filter(D<quantile(crops_tree$D, .005)) %>%
+            mutate(Position = window_center/1e6) %>%
+    select(CHR, windowStart, windowEnd, D, Position, window_center)
+
+ 
+
+interesection_crops_tree_sweep_tops<- bedtoolsr::bt.intersect(top_windows_crops_tree, sweeps_caudatus.df ) %>%
+  rename(CHR=V1, windowStart=V2, windowEnd=V3, D=V4)  %>%
+          mutate(window_center=round(((windowStart+windowEnd)/2))) %>%
+              mutate(Position = window_center/1e6) %>%
+      mutate(windowsize=windowEnd-
+             windowStart) 
+  
+
+interesection_crops_tree_sweep_bottom<- bedtoolsr::bt.intersect(bottom_windows_crops_tree, sweeps_caudatus.df) %>%
+  rename(CHR=V1, windowStart=V2, windowEnd=V3, D=V4) %>%
+          mutate(window_center=round(((windowStart+windowEnd)/2))) %>%
+              mutate(Position = window_center/1e6) %>%
+      mutate(windowsize=windowEnd-
+             windowStart) 
+
+interesection_crops_tree_sweeps_all<-rbind(interesection_crops_tree_sweep_bottom, interesection_crops_tree_sweep_tops)
+
+```
+
+```{r}
+   plot_fd_crops <-
+crops_tree.data %>%
+  # filter (chr=="Scaffold_1") %>%
+    ggplot(., aes(x=windowEnd, y=D)) +
+    # Show all points
+    geom_point(aes(alpha=0.005), alpha=0.005, color="#808080",  size=0.5) +
+        facet_grid(.~chr, scales = "free", space = "free_x") +
+         geom_point(data=top_windows_crops_tree, 
+             aes(x=window_center,y=D), 
+             color='#009E73',fill="#009E73",
+             size=1.1) +
+  geom_line(data=crops_tree, aes(x=window_center, y=quantile(crops_tree$D, .995)), color="#009E73", fill="#009E73", linetype="dashed") +
+    geom_point(data=bottom_windows_crops_tree, aes(x=window_center, y=D),color = "#808080", alpha=0.3)  +
+  geom_point(data=bottom_windows_crops_tree, 
+             aes(x=window_center,y=D), 
+             color='#56B4E9', fill="#56B4E9",
+             size=1.1) +
+  geom_line(data=crops_tree, aes(x=window_center, y=quantile(crops_tree$D, .005)), color="#56B4E9", fill="#56B4E9",  linetype="dashed") +
+                  geom_point(data=interesection_crops_tree_sweeps_all, aes(x=window_center, y=D),
+             size=2.5,  color="#D55E00") +
+         
+      facet_grid(.~CHR, scales = "free", space = "free_x") +
+              # scale_x_continuous( label = axisdf$CHR, breaks= axisdf$center ) +
+    scale_y_continuous(expand = c(0, 0.1)) +  # expand=c(0,0)removes space between plot area and x axis  +
+  scale_x_continuous(labels = addUnits) +
+                 clear_layout +
+               theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=1, size=10), legend.position = "none", axis.title.x = element_blank(), panel.spacing = unit(0.2,'lines')
+) +
+                          geom_point(data=sweeps_caudatus.df, aes(x=windowStart, y=sweep_height), shape="|", color="#000000",  size=5) 
+
+
+       
+plot_fd_crops
+
+
+ggsave(plot = plot_fd_crops, filename = "/Users/josedias/OneDrive/Stetter_Lab/GeneFlow/figures/fdm_wholegenome_05percentboth.pdf", height = 4, width = 16)
+
+ggsave(plot = plot_fd_crops, filename = "/Users/josedias/OneDrive/Stetter_Lab/GeneFlow/figures/fdm_wholegenome_05percentboth.png", height = 4, width = 16, bg="white")
+
+```
+

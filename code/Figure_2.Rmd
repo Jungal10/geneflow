@@ -74,10 +74,16 @@ sweeps_caudatus<-fread("/Users/josedias/mount/projects/ag-stetter/jdias/projects
 #               mutate(Position = window_center/1e6) %>%
 #   mutate(sweep_height=as.numeric("-1.2"))
 
-sweeps_caudatus.df$sweep_height<-as.numeric()
+
+
+topwindows<- fread("/Users/josedias/Desktop/top_comvbined_windows_caudatus.txt") %>%
+  mutate(windowsize=
+           windowStart) %>%
+  mutate(height=1) 
 
  sweeps_caudatus.df<- topwindows
 
+ sweeps_caudatus.df$sweep_height<-as.numeric()
 sweeps_caudatus.df$height<-as.numeric(-1.1)
 
 
@@ -88,7 +94,8 @@ crops_tree<- crops_tree %>%
     filter(str_detect(chr, "Scaffold")) %>%
         mutate(window_center=round(((windowStart+windowEnd)/2))) %>%
               mutate(Position = window_center/1e6) %>%
-    mutate(difference=windowEnd-windowStart) %>%
+    mutate(difference=
+             windowStart) %>%
     mutate(CHR=gsub("Scaffold_","", chr)) %>%
    mutate_at(c('CHR'), as.numeric) 
 
@@ -140,6 +147,7 @@ interesection_crops_tree_sweep_bottom<- bedtoolsr::bt.intersect(bottom_windows_c
 interesection_crops_tree_sweeps_all<-rbind(interesection_crops_tree_sweep_bottom, interesection_crops_tree_sweep_tops)
 interesection_crops_tree_sweeps_all$height<-as.numeric(-1.1)
 
+
   
   
 ```
@@ -183,39 +191,20 @@ sweeps_caudatus.df<- sweeps_caudatus.df %>%
 
   # mutate(window_center=windowCenter/1e6) %>%
 
-       plot_fd_crops <-
-    ggplot(df.tmp, aes(x=window_center, y=f_dM)) +
-    # Show all points
-    geom_point(aes(alpha=0.05), alpha=0.05, color="#808080",  size=0.5) +
-         geom_point(data=top_windows_crops_tree, 
-             aes(x=window_center,y=f_dM), 
-             color='#009E73',fill="#009E73",
-             size=1.1) +
-  geom_line(data=df.tmp, aes(x=window_center, y=quantile(crops_tree$f_dM, .995)), color="#009E73", fill="#009E73", linetype="dashed") +
-    geom_point(data=bottom_windows_crops_tree, aes(x=window_center, y=f_dM),color = "#808080", alpha=0.3)  +
-  geom_point(data=bottom_windows_crops_tree, 
-             aes(x=window_center,y=f_dM), 
-             color='#56B4E9', fill="#56B4E9",
-             size=1.1) +
-  geom_line(data=df.tmp, aes(x=window_center, y=quantile(crops_tree$f_dM, .005)), color="#56B4E9", fill="#56B4E9",  linetype="dashed") +
-                  geom_point(data=interesection_crops_tree_sweeps_all, aes(x=window_center, y=f_dM),
-             size=2.5,  color="#D55E00") +
-         
-      facet_grid(.~CHR, scales = "free", space = "free_x") +
-              # scale_x_continuous( label = axisdf$CHR, breaks= axisdf$center ) +
-    scale_y_continuous(expand = c(0, 0.1)) +  # expand=c(0,0)removes space between plot area and x axis  +
-  scale_x_continuous(labels = addUnits) +
-                 clear_layout +
-               theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=1, size=10), legend.position = "none", axis.title.x = element_blank(), panel.spacing = unit(0.2,'lines')
-) +
-                          geom_point(data=sweeps_caudatus.df, aes(x=windowStart, y=height), shape="|", color="#000000",  size=5) 
-
-
+    
        
-plot_fd_crops
-       
-        ggsave("/Users/josedias/Documents/PhD/projects/GeneFlow/text/amaranth_introgression/figures/fdM_sweeps_cau_hyp_cru_cb_full_genome.png", plot_fd_crops, bg='white', width=20, height = 5)
+        ggsave("/Users/josedias/Documents/PhD/projects/GeneFlow/text/amaranth_introgression/figures/fdM_sweeps_cau_hyp_cru_cb_full_genome.png", plot_fd_crops, bg='white', width=20, height = 5, dpi = 600)
+                ggsave("/Users/josedias/Documents/PhD/projects/GeneFlow/text/amaranth_introgression/figures/fdM_sweeps_cau_hyp_cru_cb_full_genome.pdf", plot_fd_crops, bg='white', width=20, height = 5, dpi = 600)
+              
+                
 ```
+
+
+```{r}
+phyper(57416, 7504264, 410621399, 9)
+
+```
+
 
 ```{r}
 
@@ -294,14 +283,13 @@ above_tree<- crops_tree %>%
   select(CHR, windowStart, windowEnd)
 
 below_tree <- crops_tree %>%
-  filter(crops_tree$f_dM<0) %>%
+  filter(crops_tree$f_dM<0) %>%x
   select(CHR, windowStart, windowEnd)
   
  bedtoolsr::bt.intersect(above_tree, below_tree )
 
   
- bedtoolsr::bt.intersect(top_windows_test, bottom_windows_test )
-
+ bedtoolsr::bt.intersect(top_windows_test, bottom_windows_test ) %>%
   rename(CHR=V1, windowStart=V2, windowEnd=V3, f_dM=V4)  %>%
 ```
 

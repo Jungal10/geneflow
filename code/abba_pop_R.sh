@@ -29,4 +29,3 @@ ERROFILE="file_lists/errorList.error"
 
 
 Rscript ~/angsd/R/estAvgError.R angsdFile=$ABABABABA_FILE out=$OUTPUT_FILE sizeFile=$SIZEFILE errFile=$ERROFILE nameFile=$POPNAMES
-,
