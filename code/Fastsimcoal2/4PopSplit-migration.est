@@ -1,0 +1,25 @@
+// Priors and rules file
+// *********************
+
+[PARAMETERS]
+//#isInt? #name #dist.#min #max
+//all N are in number of haploid individuals
+1 ANCSIZE1 unif 100 2000000 output
+1 ANCSIZE2 unif 100 2000000 output
+1 ANCSIZE3 unif 100 2000000 output
+1 NHCA unif 1000 100000 output
+1 NHSA unif 1000 100000 output
+1 NHYP unif 100 10000 output
+1 NCAU unif 100 10000 output
+1 TH unif 5000 9000 output
+1 TC unif 5000 9000 output
+1 TDIV unif 30000 60000 output
+0 N2M23 logunif 1e-2 20 hide
+0 N3M32 lounif 1e-2 20 hide
+
+[COMPLEX PARAMETERS]
+0 RESIZE1 = ANCSIZE1/NHYP output
+0 RESIZE2 = ANCSIZE2/NCAU output
+0 RESIZE3 = ANCSIZE3/ANCSIZE1 output
+0 MIG23 = N2M23/NCAU output
+0 MIG32 = N3M32/NHYP output
