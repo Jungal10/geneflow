@@ -3,7 +3,10 @@
 data/
 
 # tryouts 
-#sandbox/
+sandbox/
+
+#file_list
+code/file_lists
 
 # Mac files
 .DS_Store
@@ -51,6 +54,8 @@ vignettes/*.pdf
 
 # R html 
 *.nb.html
+
+
 
 .DS_Store
 lib-cov
